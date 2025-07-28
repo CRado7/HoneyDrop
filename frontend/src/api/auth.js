@@ -1,6 +1,6 @@
 // src/api/auth.js
 import { gql } from '@apollo/client';
-import client from '@/lib/apolloClient';
+// import client from '@/lib/apolloClient';
 
 export const REGISTER = gql`
   mutation Register($input: RegisterInput!) {

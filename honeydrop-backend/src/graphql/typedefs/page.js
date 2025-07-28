@@ -15,7 +15,7 @@ const pageTypeDefs = gql`
     isHomepage: Boolean
     isPublished: Boolean
     seo: SEO
-    sections: [JSON]  # assuming you're using GraphQL scalar JSON
+    sections: [Section!]!
     createdAt: String
     updatedAt: String
   }
@@ -57,7 +57,7 @@ const pageTypeDefs = gql`
     deletePage(id: ID!): Boolean!
   }
 
-  //sections
+  #sections
   scalar JSON
 
     type SectionElement {

@@ -2,10 +2,11 @@
   "name": "honeydrop-backend",
   "version": "1.0.0",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "cross-env NODE_ENV=development nodemon src/index.js",
-    "start": "cross-env NODE_ENV=production node src/index.js",
+    "dev": "cross-env NODE_ENV=development nodemon src/server.js",
+    "start": "cross-env NODE_ENV=production node src/server.js",
     "lint": "eslint . --ext .js,.mjs --ignore-path .gitignore",
     "format": "prettier --write .",
     "seed": "node scripts/seed.js"
@@ -17,12 +18,14 @@
   "dependencies": {
     "apollo-server-express": "^3.13.0",
     "backblaze-b2": "^1.7.1",
+    "bcryptjs": "^3.0.2",
     "cloudinary": "^1.41.3",
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",
-    "express": "^4.18.2",
+    "express": "^4.21.2",
     "graphql": "^16.11.0",
     "graphql-type-json": "^0.3.2",
+    "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.16.5",
     "multer": "^2.0.2",
     "multer-storage-cloudinary": "^4.0.0"

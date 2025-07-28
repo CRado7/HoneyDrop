@@ -4,7 +4,7 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
 import Editor from './pages/Editor';
-import ProtectedRoute from './components/ProtectedRoute';
+import ProtectedRoutes from './components/ProtectedRoutes';
 
 export default function App() {
   return (
@@ -12,10 +12,10 @@ export default function App() {
       <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
-      <ProtectedRoute>
+      <Route element={<ProtectedRoutes />}>
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/editor/:siteId/:pageId" element={<Editor />} />
-      </ProtectedRoute>
+      </Route>
     </Routes>
   );
 }

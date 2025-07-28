@@ -1,7 +1,7 @@
 // src/context/AuthContext.js
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { storeToken, getToken, clearToken } from '@/utils/auth';
-import { fetchCurrentUser, loginUser, registerUser } from '@/api/auth';
+import { storeToken, getToken, clearToken } from '../utils/auth';
+import { fetchCurrentUser, loginUser, registerUser } from '../api/auth';
 
 const AuthContext = createContext();
 
