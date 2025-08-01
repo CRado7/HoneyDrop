@@ -6,9 +6,10 @@ import resolvers from './graphql/resolvers/index.js';
 const schema = makeExecutableSchema({
   typeDefs,
   resolvers: {
-    JSON: GraphQLJSON, // Add the JSON scalar here
-    ...resolvers, // Spread your existing resolvers
+    ...resolvers,       // spread your existing resolvers first
+    JSON: GraphQLJSON,  // then add the JSON scalar resolver
   },
 });
 
 export default schema;
+

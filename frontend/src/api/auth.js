@@ -1,6 +1,6 @@
 // src/api/auth.js
 import { gql } from '@apollo/client';
-// import client from '@/lib/apolloClient';
+import client from '../graphql/client';
 
 export const REGISTER = gql`
   mutation Register($input: RegisterInput!) {
@@ -75,9 +75,16 @@ export const registerUser = async (input) => {
 };
 
 export const fetchCurrentUser = async () => {
-  const { data } = await client.query({
-    query: ME,
-    fetchPolicy: 'network-only',
-  });
-  return data.me;
+  try {
+    const { data } = await client.query({
+      query: ME,
+      fetchPolicy: 'network-only',
+    });
+    console.log('Fetched current user:', data.me);
+    return data.me;
+  } catch (err) {
+    console.error('Failed to fetch current user:', err);
+    throw err;
+  }
 };
+

@@ -5,14 +5,17 @@ import { BrowserRouter } from 'react-router-dom';
 import { ApolloProvider } from '@apollo/client';
 import client from './graphql/client';
 import App from './App';
-import { AuthProvider } from './context/authContext'; // ✅ Import your new provider
+import { AuthProvider } from './context/authContext';
+import { Toaster } from 'react-hot-toast';
+import './index.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <ApolloProvider client={client}>
-    <AuthProvider> {/* ✅ Wrap your app with AuthProvider */}
+    <AuthProvider>
       <BrowserRouter>
         <App />
+        <Toaster position="top-right" toastOptions={{ duration: 3000 }}/>
       </BrowserRouter>
     </AuthProvider>
   </ApolloProvider>

@@ -1,6 +1,6 @@
 // src/hooks/usePlans.js
 import { useQuery } from '@apollo/client';
-import { GET_PLAN_PACKAGES, GET_PLAN_PACKAGE } from '@/api/plans';
+import { GET_PLAN_PACKAGES, GET_PLAN_PACKAGE } from '../api/plan';
 
 // 📦 All plans
 export const usePlanPackages = () => {

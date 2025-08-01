@@ -1,6 +1,6 @@
 // src/api/plans.js
 import { gql } from '@apollo/client';
-import client from '@/lib/apolloClient';
+import client from '../graphql/client';
 
 export const GET_PLAN_PACKAGES = gql`
   query GetPlanPackages {

@@ -4,9 +4,11 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
 const generateToken = (user) =>
-  jwt.sign({ id: user.id, email: user.email, role: user.role }, process.env.JWT_SECRET, {
-    expiresIn: '7d',
-  });
+  jwt.sign(
+    { id: user._id.toString(), email: user.email, role: user.role },
+    process.env.JWT_SECRET,
+    { expiresIn: '7d' }
+  );
 
 export default {
   Query: {
@@ -48,6 +50,36 @@ export default {
 
       const token = generateToken(user);
       return { token, user };
+    },
+
+    updateProfile: async (_, { input }, { user }) => {
+      if (!user) throw new Error('Not authenticated');
+  
+      const currentUser = await User.findById(user.id);
+      if (!currentUser) throw new Error('User not found');
+  
+      const { name, phone, company, role, planPackageId } = input;
+  
+      // Restrict role changes to admins
+      if (role && user.role !== 'admin') {
+        throw new Error('You do not have permission to change role');
+      }
+  
+      // Validate planPackage if provided
+      if (planPackageId) {
+        const plan = await PlanPackage.findById(planPackageId);
+        if (!plan) throw new Error('Invalid plan package selected');
+        currentUser.planPackage = plan._id;
+      }
+  
+      // Update fields
+      if (name) currentUser.name = name;
+      if (phone) currentUser.phone = phone;
+      if (company) currentUser.company = company;
+      if (role) currentUser.role = role;
+  
+      await currentUser.save();
+      return await User.findById(currentUser._id).populate('planPackage websites');
     },
   },
   User: {

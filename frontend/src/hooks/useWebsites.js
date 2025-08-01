@@ -5,7 +5,7 @@ import {
   GET_WEBSITE_BY_ID,
   CREATE_WEBSITE,
   DELETE_WEBSITE,
-} from '@/api/websites';
+} from '../api/websites';
 
 export const useUserWebsites = () => {
   const { data, loading, error, refetch } = useQuery(GET_USER_WEBSITES);

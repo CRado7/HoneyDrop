@@ -1,0 +1,25 @@
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 250px;
+    height: 100vh;
+    transition: transform 0.3s ease-in-out;
+    z-index: 1040;
+  }
+  
+  .slide-in {
+    transform: translateX(0);
+  }
+  
+  .slide-out {
+    transform: translateX(-100%);
+  }
+  
+  @media (min-width: 768px) {
+    .sidebar {
+      transform: translateX(0) !important;
+      position: relative;
+    }
+  }
+  

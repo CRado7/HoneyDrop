@@ -9,7 +9,7 @@
     "start": "cross-env NODE_ENV=production node src/server.js",
     "lint": "eslint . --ext .js,.mjs --ignore-path .gitignore",
     "format": "prettier --write .",
-    "seed": "node scripts/seed.js"
+    "seed:plans": "node scripts/seedPlanPackages.js"
   },
   "keywords": [],
   "author": "",

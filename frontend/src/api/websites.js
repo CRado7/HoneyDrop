@@ -1,6 +1,6 @@
 // src/api/websites.js
 import { gql } from '@apollo/client';
-import client from '@/lib/apolloClient';
+import client from '../graphql/client';
 
 export const GET_USER_WEBSITES = gql`
   query GetUserWebsites {

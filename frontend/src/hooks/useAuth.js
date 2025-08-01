@@ -1,6 +1,6 @@
 // src/hooks/useAuth.js
 import { useMutation, useQuery } from '@apollo/client';
-import { LOGIN, REGISTER, ME } from '@/api/auth';
+import { LOGIN, REGISTER, ME } from '../api/auth';
 
 export const useLogin = () => {
   const [login, { data, loading, error }] = useMutation(LOGIN);

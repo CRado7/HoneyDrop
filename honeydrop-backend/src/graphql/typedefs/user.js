@@ -6,6 +6,8 @@ export default gql`
     name: String!
     email: String!
     role: String!
+    company: String
+    phone: String
     planPackage: PlanPackage
     websites: [Website!]!
   }
@@ -33,5 +35,14 @@ export default gql`
   type Mutation {
     register(input: RegisterInput!): AuthPayload!
     login(input: LoginInput!): AuthPayload!
+    updateProfile(input: UpdateProfileInput!): User!
+  }
+  
+  input UpdateProfileInput {
+    name: String
+    phone: String
+    company: String
+    role: String
+    planPackageId: ID
   }
 `;

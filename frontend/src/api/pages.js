@@ -1,6 +1,6 @@
 // src/api/pages.js
 import { gql } from '@apollo/client';
-import client from '@/lib/apolloClient';
+import client from '../graphql/client';
 
 export const GET_PAGES_BY_SITE = gql`
   query GetPagesBySite($siteId: ID!) {
