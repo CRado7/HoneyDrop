@@ -6,6 +6,7 @@ import { ApolloProvider } from '@apollo/client';
 import client from './graphql/client';
 import App from './App';
 import { AuthProvider } from './context/authContext';
+import { ThemeProvider } from './context/themeContext';
 import { Toaster } from 'react-hot-toast';
 import './index.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -13,10 +14,12 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 ReactDOM.createRoot(document.getElementById('root')).render(
   <ApolloProvider client={client}>
     <AuthProvider>
-      <BrowserRouter>
-        <App />
-        <Toaster position="top-right" toastOptions={{ duration: 3000 }}/>
-      </BrowserRouter>
+      <ThemeProvider>
+        <BrowserRouter>
+          <App />
+          <Toaster position="top-right" toastOptions={{ duration: 3000 }}/>
+        </BrowserRouter>
+      </ThemeProvider>
     </AuthProvider>
   </ApolloProvider>
 );

@@ -35,7 +35,15 @@ export default function LoginForm({ onSuccess }) {
   };
 
   // Show your skeleton loader while login is happening
-  if (loading) return <SkeletonLoader />;
+  if (loading) {
+    return (
+      <div className="container d-flex justify-content-center align-items-center min-vh-100">
+        <div className="w-100" style={{ maxWidth: '1200px' }}>
+          <SkeletonLoader />
+        </div>
+      </div>
+    );
+  }  
 
   return (
     <form onSubmit={handleSubmit} className="needs-validation" noValidate>
@@ -69,7 +77,7 @@ export default function LoginForm({ onSuccess }) {
 
       {error && <div className="alert alert-danger">{error.message}</div>}
 
-      <button type="submit" className="btn btn-primary w-100" disabled={loading}>
+      <button type="submit" className="btn-honey w-100" disabled={loading}>
         Login
       </button>
     </form>

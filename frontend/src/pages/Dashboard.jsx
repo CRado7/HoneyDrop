@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import {
-  Card, Badge, Spinner, Row, Col, Modal, Button, Form,
-} from 'react-bootstrap';
+import { Card, Badge, Spinner, Row, Col, Modal, Button, Form } from 'react-bootstrap';
 import { PlusLg, Trash } from 'react-bootstrap-icons';
+import Sidebar from '../components/Sidebar/Sidebar';
 import { useNavigate } from 'react-router-dom';
 
 import { useUserWebsites, useCreateWebsite, useDeleteWebsite } from '../hooks/useWebsites';
@@ -27,15 +26,15 @@ export default function Dashboard() {
         variables: {
           input: {
             name: siteName
-            // domain: optionalFieldIfNeeded
           }
         }
       });
   
       const site = res.data?.createWebsite;
+      const slug = site.name.toLowerCase().replace(/\s+/g, '-');
   
-      if (site?.id && site?.defaultPageId) {
-        navigate(`/editor/${site.id}/${site.defaultPageId}`);
+      if (site?.id) {
+        navigate(`/editor/${user.id}/${slug}`);
       }
   
       setShowCreateModal(false);
@@ -74,7 +73,8 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="p-4">
+    <div className="p-5 ">
+      <Sidebar />
       <div className="mb-4 d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
         <div>
           <h2 className="fw-bold mb-1">Welcome, {user?.name || 'User'}!</h2>
@@ -83,49 +83,49 @@ export default function Dashboard() {
       </div>
 
       <Row xs={1} sm={2} md={3} lg={4} className="g-4">
-  {websites.map((site) => {
-    const slug = site.name.toLowerCase().replace(/\s+/g, '-'); // or use a utility slugify function
+        {websites.map((site) => {
+          const slug = site.name.toLowerCase().replace(/\s+/g, '-'); // or use a utility slugify function
 
-    return (
-      <Col key={site.id}>
-        <Card className="h-100 shadow-sm position-relative">
-          <div
-            role="button"
-            onClick={() => navigate(`/editor/${user.id}/${slug}`)}
-            onKeyDown={(e) =>
-              e.key === 'Enter' && navigate(`/editor/${user.id}/${slug}`)
-            }
-            tabIndex={0}
-            className="text-decoration-none text-dark position-relative h-100"
-          >
-            <Card.Img
-              variant="top"
-              src={site.thumbnail || '/placeholder-thumb.jpg'}
-              alt={site.name}
-              style={{ objectFit: 'cover', height: 150 }}
-            />
-            <Card.Body>
-              <Card.Title className="text-truncate mb-0">{site.name}</Card.Title>
-            </Card.Body>
-          </div>
+          return (
+            <Col key={site.id}>
+              <Card className="h-100 shadow-sm position-relative">
+                <div
+                  role="button"
+                  onClick={() => navigate(`/editor/${user.id}/${slug}`)}
+                  onKeyDown={(e) =>
+                    e.key === 'Enter' && navigate(`/editor/${user.id}/${slug}`)
+                  }
+                  tabIndex={0}
+                  className="text-decoration-none text-dark position-relative h-100"
+                >
+                  <Card.Img
+                    variant="top"
+                    src={site.thumbnail || '/placeholder-thumb.jpg'}
+                    alt={site.name}
+                    style={{ objectFit: 'cover', height: 150 }}
+                  />
+                  <Card.Body>
+                    <Card.Title className="text-truncate mb-0">{site.name}</Card.Title>
+                  </Card.Body>
+                </div>
 
-          {/* Delete Button */}
-          <Button
-            variant="danger"
-            size="sm"
-            style={{ position: 'absolute', top: 10, right: 10 }}
-            onClick={(e) => {
-              e.stopPropagation(); // prevent navigating
-              setSiteToDelete(site);
-              setShowDeleteModal(true);
-            }}
-          >
-            <Trash size={16} />
-          </Button>
-        </Card>
-      </Col>
-          );
-        })}
+                {/* Delete Button */}
+                <Button
+                  variant="danger"
+                  size="sm"
+                  style={{ position: 'absolute', top: 10, right: 10 }}
+                  onClick={(e) => {
+                    e.stopPropagation(); // prevent navigating
+                    setSiteToDelete(site);
+                    setShowDeleteModal(true);
+                  }}
+                >
+                  <Trash size={16} />
+                </Button>
+              </Card>
+            </Col>
+                );
+              })}
 
         {/* Add New Website Card */}
         <Col>
