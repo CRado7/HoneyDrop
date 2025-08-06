@@ -3,7 +3,7 @@ import LandingPage from './pages/Landing/LandingPage';
 import CompleteProfile from './pages/CompleteProfile';
 import Sidebar from './components/Sidebar/Sidebar';
 import Dashboard from './pages/Dashboard';
-import Editor from './pages/Editor';
+import Editor from './pages/Editor/Editor';
 import ProtectedRoutes from './components/ProtectedRoutes';
 import Login from './pages/Login';
 

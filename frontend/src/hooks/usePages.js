@@ -6,7 +6,7 @@ import {
   CREATE_PAGE,
   UPDATE_PAGE,
   DELETE_PAGE,
-} from '@/api/pages';
+} from '../api/pages';
 
 // 📄 Get all pages for a site
 export const usePagesBySite = (siteId) => {

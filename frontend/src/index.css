@@ -45,6 +45,8 @@
 .btn-honey {
   background-color: var(--golden-honey);
   color: var(--bee-black);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
   border: none;
 }
 .btn-honey:hover {
