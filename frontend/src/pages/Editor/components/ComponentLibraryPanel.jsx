@@ -54,9 +54,9 @@ export default function ComponentLibraryPanel({ onAddComponent }) {
         <Accordion.Item eventKey={idx.toString()} key={category}>
           <Accordion.Header>{category}</Accordion.Header>
           <Accordion.Body>
-            {components.map((component) => (
+            {components.map((component, index) => (
               <DraggableComponent
-                key={component._id}
+                key={component._id || `${component.label}-${component.type}-${index}`}
                 component={component}
                 onAddComponent={onAddComponent}
               />
