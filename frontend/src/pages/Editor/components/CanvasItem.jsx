@@ -1,7 +1,15 @@
 import React from 'react';
 import { useDrag, useDrop } from 'react-dnd';
 
-const CanvasItem = ({ component, index, onSelect, selected, onDelete, onUpdate }) => {
+const CanvasItem = ({
+  component,
+  index,
+  onSelect,
+  selected,
+  onDelete,
+  onUpdate,
+  devicePreview = 'desktop', // default fallback
+}) => {
   const [{ isDragging }, drag] = useDrag(() => ({
     type: 'canvas-item',
     item: { index },
@@ -18,13 +26,29 @@ const CanvasItem = ({ component, index, onSelect, selected, onDelete, onUpdate }
   });
 
   const ref = node => drag(drop(node));
-
   const isSelected = selected === index;
 
-  // Use defaults.tag and defaults.text for rendering
   const Tag = component.defaults?.tag || 'div';
   const content = component.defaults?.text || 'Sample Text';
-  const styles = component.defaults?.styles || {};
+
+  const allStyles = component.defaults?.styles || {};
+
+  // Extract device-specific styles if exist, else empty
+  const deviceStyles = allStyles[devicePreview] || {};
+
+  // Create shallow copy of global styles (all keys except devices)
+  const globalStyles = Object.entries(allStyles).reduce((acc, [key, value]) => {
+    if (!['desktop', 'tablet', 'mobile'].includes(key)) {
+      acc[key] = value;
+    }
+    return acc;
+  }, {});
+
+  // Merge global + device styles (device overrides global)
+  const styles = {
+    ...globalStyles,
+    ...deviceStyles,
+  };
 
   const className = `position-relative p-3 border mb-2 ${
     isSelected ? 'bg-primary bg-opacity-10' : 'bg-white'
@@ -44,17 +68,17 @@ const CanvasItem = ({ component, index, onSelect, selected, onDelete, onUpdate }
       </button>
 
       {/* Editable or display view */}
-      {isSelected ? (
+      {isSelected && component.type !== 'section' ? (
         <Tag
           contentEditable
           suppressContentEditableWarning
           style={styles}
           onInput={(e) => {
             const updatedText = e.currentTarget.textContent;
-            onUpdate(index, 'defaults', { text: updatedText });
+            onUpdate(index, 'defaults.text', updatedText);  // pass key, value format to onUpdate
           }}
         >
-            {content}
+          {content}
         </Tag>
       ) : (
         <Tag style={styles}>{content}</Tag>

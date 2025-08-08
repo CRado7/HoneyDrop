@@ -13,8 +13,8 @@ export default function EditorCanvas() {
   const { siteName } = useParams();
   const [elements, setElements] = useState([]);
   const [selectedIndex, setSelectedIndex] = useState(null);
+  const [devicePreview, setDevicePreview] = useState('desktop');
 
-  // Accept dropped components from the library
   const [, drop] = useDrop(() => ({
     accept: 'component',
     drop: (item) => {
@@ -39,27 +39,26 @@ export default function EditorCanvas() {
     }
   };
 
-  const handleUpdate = (index, key, value) => {
-    const updated = [...elements];
-  
-    if (key === 'defaults') {
-      updated[index] = {
-        ...updated[index],
-        defaults: {
-          ...updated[index].defaults,
-          ...value,
-          styles: {
-            ...updated[index].defaults?.styles,
-            ...value.styles,
-          },
-        },
-      };
-    } else {
-      updated[index][key] = value;
-    }
-  
-    setElements(updated);
-  };  
+  const handleUpdate = ({ key, value, index }) => {
+    setElements((prev) =>
+      prev.map((comp, i) => {
+        if (i !== index) return comp;
+
+        const updated = { ...comp };
+        const keys = key.split('.');
+        let obj = updated;
+
+        for (let j = 0; j < keys.length - 1; j++) {
+          if (!obj[keys[j]]) obj[keys[j]] = {};
+          obj = obj[keys[j]];
+        }
+
+        obj[keys[keys.length - 1]] = value;
+
+        return updated;
+      })
+    );
+  };
 
   const handleDelete = (index) => {
     const updated = [...elements];
@@ -104,7 +103,9 @@ export default function EditorCanvas() {
             }}
           >
             {elements.length === 0 && (
-              <p className="text-muted text-center py-5">Drag components from the left panel to start building your page</p>
+              <p className="text-muted text-center py-5">
+                Drag components from the left panel to start building your page
+              </p>
             )}
             {elements.map((el, idx) => (
               <CanvasItem
@@ -114,23 +115,24 @@ export default function EditorCanvas() {
                 selected={selectedIndex}
                 onSelect={handleSelect}
                 onDelete={handleDelete}
-                onUpdate={handleUpdate}
+                onUpdate={({ key, value }) =>
+                  handleUpdate({ key, value, index: idx })
+                }
+                devicePreview={devicePreview}
               />
             ))}
           </div>
-          {elements.length < 1 && (
-              <p className="text-muted text-center py-5">Drag components from the left panel to start building your page</p>
-            )}
         </div>
 
         {/* Inspector */}
         <div className="col-3 bg-light p-3 border-start">
           <Inspector
+            devicePreview={devicePreview}
+            setDevicePreview={setDevicePreview}
             component={selectedIndex != null ? elements[selectedIndex] : null}
             onUpdate={(key, value) => {
-              const updated = [...elements];
-              updated[selectedIndex][key] = value;
-              setElements(updated);
+              if (selectedIndex == null) return;
+              handleUpdate({ key, value, index: selectedIndex });
             }}
           />
         </div>
