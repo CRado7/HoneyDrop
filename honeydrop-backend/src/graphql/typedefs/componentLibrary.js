@@ -23,9 +23,9 @@ const componentLibraryTypeDefs = gql`
   }
 
   type InspectorFieldConfig {
-    min: Int
-    max: Int
-    step: Int
+    min: Float
+    max: Float
+    step: Float
     units: [String]
     defaultUnit: String
     defaultValue: JSON
@@ -40,9 +40,9 @@ const componentLibraryTypeDefs = gql`
   }
 
   input InspectorFieldConfigInput {
-    min: Int
-    max: Int
-    step: Int
+    min: Float
+    max: Float
+    step: Float
     units: [String]
     defaultUnit: String
     defaultValue: JSON
