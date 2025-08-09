@@ -4,11 +4,12 @@ import { Accordion, Button, Spinner } from 'react-bootstrap';
 import { useComponentLibrary } from '../../../hooks/useComponents';
 import { useDrag } from 'react-dnd';
 
+
 function DraggableComponent({ component, onAddComponent }) {
   const [, drag] = useDrag(() => ({
     type: 'component',
     item: {
-      ...component.defaults,
+      defaults: { ...component.defaults },  // wrap defaults here
       tag: component.tag,
       label: component.label,
       type: component.type,

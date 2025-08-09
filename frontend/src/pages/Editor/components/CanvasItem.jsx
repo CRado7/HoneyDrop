@@ -1,6 +1,15 @@
 import React from 'react';
 import { useDrag, useDrop } from 'react-dnd';
 
+// Helper to convert style values with units
+const normalizeUnitStyle = (styleObj, key, defaultValue = 100, defaultUnit = '%') => {
+  if (styleObj[key] && typeof styleObj[key] === 'object') {
+    const value = styleObj[key].value ?? defaultValue;
+    const unit = styleObj[key].unit ?? defaultUnit;
+    styleObj[key] = `${value}${unit}`;
+  }
+};
+
 const CanvasItem = ({
   component,
   index,
@@ -8,7 +17,7 @@ const CanvasItem = ({
   selected,
   onDelete,
   onUpdate,
-  devicePreview = 'desktop', // default fallback
+  devicePreview = 'desktop',
 }) => {
   const [{ isDragging }, drag] = useDrag(() => ({
     type: 'canvas-item',
@@ -25,34 +34,75 @@ const CanvasItem = ({
     },
   });
 
-  const ref = node => drag(drop(node));
+  const ref = (node) => drag(drop(node));
   const isSelected = selected === index;
 
-  const Tag = component.defaults?.tag || 'div';
-  const content = component.defaults?.text || 'Sample Text';
-
+  // Merge global + device styles
   const allStyles = component.defaults?.styles || {};
-
-  // Extract device-specific styles if exist, else empty
   const deviceStyles = allStyles[devicePreview] || {};
-
-  // Create shallow copy of global styles (all keys except devices)
   const globalStyles = Object.entries(allStyles).reduce((acc, [key, value]) => {
     if (!['desktop', 'tablet', 'mobile'].includes(key)) {
       acc[key] = value;
     }
     return acc;
   }, {});
+  const styles = { ...globalStyles, ...deviceStyles };
 
-  // Merge global + device styles (device overrides global)
-  const styles = {
-    ...globalStyles,
-    ...deviceStyles,
-  };
+  // Normalize unit styles
+  normalizeUnitStyle(styles, 'width');
+  normalizeUnitStyle(styles, 'height', 'auto', '');
 
   const className = `position-relative p-3 border mb-2 ${
     isSelected ? 'bg-primary bg-opacity-10' : 'bg-white'
   }`;
+
+  const handleContentChange = (e) => {
+    const updated = e.currentTarget.textContent;
+    onUpdate(index, 'defaults.text', updated);
+  };
+
+  // Render logic based on component type/data
+  const renderContent = () => {
+    const defaults = component.defaults || {};
+
+    // Media element
+    if (defaults.src) {
+      return (
+        <img
+          src={defaults.src}
+          alt={defaults.alt || ''}
+          style={styles}
+        />
+      );
+    }
+
+    // Card with HTML content
+    if (defaults.content) {
+      return (
+        <div
+          style={styles}
+          dangerouslySetInnerHTML={{ __html: defaults.content }}
+        />
+      );
+    }
+
+    // Heading/Text
+    const Tag = defaults.tag || 'div';
+    const text = defaults.text || 'Sample Text';
+    if (isSelected && component.type !== 'section') {
+      return (
+        <Tag
+          contentEditable
+          suppressContentEditableWarning
+          style={styles}
+          onInput={handleContentChange}
+        >
+          {text}
+        </Tag>
+      );
+    }
+    return <Tag style={styles}>{text}</Tag>;
+  };
 
   return (
     <div ref={ref} className={className} onClick={() => onSelect('select', index)}>
@@ -67,22 +117,7 @@ const CanvasItem = ({
         ×
       </button>
 
-      {/* Editable or display view */}
-      {isSelected && component.type !== 'section' ? (
-        <Tag
-          contentEditable
-          suppressContentEditableWarning
-          style={styles}
-          onInput={(e) => {
-            const updatedText = e.currentTarget.textContent;
-            onUpdate(index, 'defaults.text', updatedText);  // pass key, value format to onUpdate
-          }}
-        >
-          {content}
-        </Tag>
-      ) : (
-        <Tag style={styles}>{content}</Tag>
-      )}
+      {renderContent()}
     </div>
   );
 };
