@@ -19,14 +19,15 @@ export default function EditorCanvas() {
     accept: 'component',
     drop: (item) => {
       const newComponent = {
-        ...item.defaults,
+        defaults: { ...item.defaults },  // wrap in defaults key
         type: item.type,
-        tag: item.tag,
+        tag: item.tag || (item.defaults && item.defaults.tag) || 'div',
+        label: item.label,
         inspectorFields: item.inspectorFields || [],
       };
       setElements((prev) => [...prev, newComponent]);
     },
-  }));
+  }));  
 
   const handleSelect = (action, fromIndex, toIndex) => {
     if (action === 'select') {
@@ -93,13 +94,12 @@ export default function EditorCanvas() {
         <div className="col-7 p-4 overflow-auto" ref={drop}>
           <h5>Editor: {siteName}</h5>
           <div
-            className="canvas-preview rounded p-4"
+            className="canvas-preview"
             style={{
               minHeight: '80vh',
-              backgroundColor: '#f7f7f7',
-              border: '2px dashed #ddd',
+              backgroundColor: 'white',
               boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
-              borderRadius: '8px',
+              borderRadius: '0px',
             }}
           >
             {elements.length === 0 && (

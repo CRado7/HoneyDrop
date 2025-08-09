@@ -6,14 +6,14 @@ import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import { Spinner, Form } from 'react-bootstrap';
 import { House, Gear, Person, BoxArrowRight, WindowStack } from 'react-bootstrap-icons';
-import { useTheme } from '../../context/themeContext';
+// import { useTheme } from '../../context/themeContext';
 import './Sidebar.css';
 
 const Sidebar = () => {
   const { user, loading, error } = useCurrentUser();
-  const { dark, toggleDark } = useTheme();
+  // const { dark, toggleDark } = useTheme();
   const { logout } = useAuth();
-const navigate = useNavigate();
+  const navigate = useNavigate();
 
 
   if (loading) return <div className="p-3"><Spinner animation="border" size="sm" /></div>;
@@ -35,7 +35,7 @@ const navigate = useNavigate();
         </Link>
 
         {/* Theme Switch */}
-        <div className="px-3 mb-3">
+        {/* <div className="px-3 mb-3">
           <Form.Check
             type="switch"
             id="dark-mode-toggle"
@@ -43,7 +43,7 @@ const navigate = useNavigate();
             checked={dark}
             onChange={toggleDark}
           />
-        </div>
+        </div> */}
 
         <ul className="nav nav-pills flex-column">
           <li className="nav-item">
