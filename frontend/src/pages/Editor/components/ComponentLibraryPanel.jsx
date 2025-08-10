@@ -9,7 +9,7 @@ function DraggableComponent({ component, onAddComponent }) {
   const [, drag] = useDrag(() => ({
     type: 'component',
     item: {
-      defaults: { ...component.defaults },  // wrap defaults here
+      defaults: { ...component.defaults }, 
       tag: component.tag,
       label: component.label,
       type: component.type,

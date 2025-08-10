@@ -10,9 +10,10 @@ const baseStyles = {
     backgroundColor: '#ffffff',
     borderRadius: '8px',
     boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-    width: '400px',   // default fixed width in px
+    width: '400px',
     height: 'auto',
-    color: '#000000', // default black text
+    color: '#000000',
+    margin: '0 auto',
     fontFamily: 'Arial, sans-serif',
   };
   
