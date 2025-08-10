@@ -54,22 +54,82 @@ export default function Inspector({ component, onUpdate }) {
 
   const renderMarginPaddingControl = (type) => {
     const sides = ['Top', 'Right', 'Bottom', 'Left'];
-
+    const isMargin = type.toLowerCase() === 'margin';
+  
+    // Note: No device here since styles are flat
+    const margin = getStyle(`styles.${type}`) || '';
+    const marginLeft = getStyle(`styles.${type}Left`) || '';
+    const marginRight = getStyle(`styles.${type}Right`) || '';
+  
+    console.log('Getting margin:', getStyle('styles.margin'));
+console.log('Getting padding:', getStyle('styles.padding'));
+console.log('margin:', margin, 'marginLeft:', marginLeft, 'marginRight:', marginRight);
+  
+    const marginAuto =
+      isMargin &&
+      (
+        margin === '0 auto' ||
+        (marginLeft === 'auto' && marginRight === 'auto')
+      );
+  
+      const toggleMarginAuto = (checked) => {
+        if (!isMargin) return;
+      
+        let updatedDefaults = { ...defaults };
+      
+        if (checked) {
+          // Remove shorthand margin, set marginLeft/right to 'auto' and preserve top/bottom margins or default to '0px'
+          const marginTop = getStyle(`styles.${type}Top`) || '0px';
+          const marginBottom = getStyle(`styles.${type}Bottom`) || '0px';
+      
+          updatedDefaults = updateNestedValue(updatedDefaults, `styles.${type}`, ''); // Clear shorthand
+          updatedDefaults = updateNestedValue(updatedDefaults, `styles.${type}Left`, 'auto');
+          updatedDefaults = updateNestedValue(updatedDefaults, `styles.${type}Right`, 'auto');
+          updatedDefaults = updateNestedValue(updatedDefaults, `styles.${type}Top`, marginTop);
+          updatedDefaults = updateNestedValue(updatedDefaults, `styles.${type}Bottom`, marginBottom);
+        } else {
+          // Clear shorthand margin, set all sides explicitly to '0px'
+          updatedDefaults = updateNestedValue(updatedDefaults, `styles.${type}`, '');
+          updatedDefaults = updateNestedValue(updatedDefaults, `styles.${type}Left`, '0px');
+          updatedDefaults = updateNestedValue(updatedDefaults, `styles.${type}Right`, '0px');
+          updatedDefaults = updateNestedValue(updatedDefaults, `styles.${type}Top`, '0px');
+          updatedDefaults = updateNestedValue(updatedDefaults, `styles.${type}Bottom`, '0px');
+        }
+      
+        onUpdate('defaults', updatedDefaults);
+      };   
+  
     return (
       <div className="mb-4">
         <h6 className="mb-3 text-capitalize">{type}</h6>
+  
+        {isMargin && (
+          <Form.Check
+            type="checkbox"
+            id={`${type}-auto`}
+            label="Center with margin: auto"
+            checked={marginAuto}
+            onChange={(e) => toggleMarginAuto(e.target.checked)}
+            className="mb-3"
+          />
+        )}
+  
         {sides.map((side) => {
-          const key = `styles.${selectedDevice}.${type}${side}`;
+          const key = `styles.${type}${side}`;
           const rawValue = getStyle(key) || '';
           const match = /^(-?\d+(?:\.\d+)?)(\D+)?$/.exec(rawValue);
           const valueNum = match ? parseFloat(match[1]) : 0;
           const currentUnit = match?.[2] ?? 'px';
-
+  
+          const disabled =
+            isMargin && marginAuto && (side === 'Left' || side === 'Right');
+  
           return (
             <Form.Group key={`${key}-slider`} className="mb-2">
               <Form.Label>
-                {type.charAt(0).toUpperCase() + type.slice(1)} {side}: {valueNum}
-                {currentUnit}
+                {type.charAt(0).toUpperCase() + type.slice(1)} {side}:{' '}
+                {disabled ? 'auto' : valueNum}
+                {disabled ? '' : currentUnit}
               </Form.Label>
               <Row>
                 <Col xs={9}>
@@ -77,15 +137,21 @@ export default function Inspector({ component, onUpdate }) {
                     min={-100}
                     max={100}
                     step={1}
-                    value={valueNum}
-                    onChange={(e) => updateStyle(key, `${e.target.value}${currentUnit}`)}
+                    value={disabled ? 0 : valueNum}
+                    disabled={disabled}
+                    onChange={(e) =>
+                      updateStyle(key, `${e.target.value}${currentUnit}`)
+                    }
                   />
                 </Col>
                 <Col xs={3}>
                   <Form.Select
                     size="sm"
                     value={currentUnit}
-                    onChange={(e) => updateStyle(key, `${valueNum}${e.target.value}`)}
+                    disabled={disabled}
+                    onChange={(e) =>
+                      updateStyle(key, `${valueNum}${e.target.value}`)
+                    }
                   >
                     <option value="px">px</option>
                     <option value="%">%</option>
@@ -99,7 +165,7 @@ export default function Inspector({ component, onUpdate }) {
         })}
       </div>
     );
-  };
+  };   
 
   const renderTextAlignControl = () => {
     const alignment = getStyle(`styles.${selectedDevice}.textAlign`) || 'left';
@@ -141,7 +207,7 @@ export default function Inspector({ component, onUpdate }) {
   };
 
   return (
-    <div className='vh-100' style={{ overflowY: 'scroll' }}>
+    <div className="vh-100" style={{ overflowY: 'scroll' }}>
       <h5>Inspector</h5>
       <p>
         Editing: <strong>{component.label || component.type}</strong>
