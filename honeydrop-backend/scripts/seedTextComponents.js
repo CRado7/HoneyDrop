@@ -24,68 +24,6 @@ const baseDefaults = {
   paddingLeft: '0px',
 };
 
-const inspectorFields = [
-  {
-    key: 'text',
-    label: 'Text',
-    type: 'text',
-  },
-  {
-    key: 'styles.fontSize',
-    label: 'Font Size',
-    type: 'slider',
-    config: {
-      min: 10,
-      max: 48,
-      step: 1,
-      units: ['px', '%'],
-      defaultUnit: 'px',
-      defaultValue: 16,
-    },
-  },
-  {
-    key: 'styles.fontWeight',
-    label: 'Font Weight',
-    type: 'select',
-    options: ['normal', 'bold', 'lighter'],
-  },
-  {
-    key: 'styles.color',
-    label: 'Color',
-    type: 'color',
-  },
-  {
-    key: 'styles.fontFamily',
-    label: 'Font Family',
-    type: 'select',
-    options: systemFonts,
-  },
-  {
-    key: 'styles.lineHeight',
-    label: 'Line Height',
-    type: 'slider',
-    config: {
-      min: 1,
-      max: 3,
-      step: 1,
-      defaultValue: 1.6,
-    },
-  },
-  {
-    key: 'styles.letterSpacing',
-    label: 'Letter Spacing',
-    type: 'slider',
-    config: {
-      min: -2,
-      max: 10,
-      step: 1,
-      units: ['px'],
-      defaultUnit: 'px',
-      defaultValue: 0,
-    },
-  },
-];
-
 const seedTextComponents = async () => {
   try {
     await mongoose.connect(MONGO_URI);
@@ -101,30 +39,28 @@ const seedTextComponents = async () => {
         type: 'paragraph',
         label: 'Paragraph',
         defaults: {
-          text: 'This is a paragraph. You can edit this text.',
           tag: 'p',
+          content: `<p>This is a paragraph. You can edit this text.</p>`,
           styles: { ...baseDefaults },
         },
-        inspectorFields,
       },
       {
         category: 'Text',
         type: 'span',
         label: 'Span',
         defaults: {
-          text: 'This is inline span text.',
           tag: 'span',
+          content: `<span>This is inline span text.</span>`,
           styles: { ...baseDefaults },
         },
-        inspectorFields,
       },
       {
         category: 'Text',
         type: 'blockquote',
         label: 'Blockquote',
         defaults: {
-          text: '“This is a quote. Customize it as you like.”',
           tag: 'blockquote',
+          content: `<blockquote>“This is a quote. Customize it as you like.”</blockquote>`,
           styles: {
             ...baseDefaults,
             fontStyle: 'italic',
@@ -132,28 +68,16 @@ const seedTextComponents = async () => {
             paddingLeft: '16px',
           },
         },
-        inspectorFields: [
-          ...inspectorFields,
-          {
-            key: 'styles.fontStyle',
-            label: 'Font Style',
-            type: 'select',
-            options: ['normal', 'italic'],
-          },
-          {
-            key: 'styles.borderLeft',
-            label: 'Left Border',
-            type: 'text',
-          },
-        ],
       },
       {
         category: 'Text',
         type: 'preformatted',
         label: 'Preformatted',
         defaults: {
-          text: 'Preformatted\n  Indented\n    Spacing preserved.',
           tag: 'pre',
+          content: `<pre>Preformatted
+  Indented
+    Spacing preserved.</pre>`,
           styles: {
             ...baseDefaults,
             fontFamily: '"Courier New", monospace',
@@ -162,14 +86,6 @@ const seedTextComponents = async () => {
             overflowX: 'auto',
           },
         },
-        inspectorFields: [
-          ...inspectorFields,
-          {
-            key: 'styles.backgroundColor',
-            label: 'Background',
-            type: 'color',
-          },
-        ],
       },
     ];
 

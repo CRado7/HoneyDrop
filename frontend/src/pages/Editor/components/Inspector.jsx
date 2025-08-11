@@ -101,6 +101,18 @@ const updateStyle = (keyOrNull, valueOrStyles) => {
     return [parseFloat(match[1]), match[3] || 'px'];
   };
 
+  // Determine which key to use for content: prefer 'content', fallback to 'text'
+  const contentKey = defaults.content !== undefined ? 'content' : 'text';
+
+  // Determine content value to edit
+  const content = defaults[contentKey] ?? '';
+
+  // Update content and keep key consistent
+  const updateContent = (newContent) => {
+    const updatedDefaults = { ...defaults, [contentKey]: newContent };
+    onUpdate('defaults', updatedDefaults);
+  };
+
   // Renders sliders for margin/padding sides grouped by type
   const renderMarginPaddingControl = (type) => {
     const sides = ['Top', 'Right', 'Bottom', 'Left'];
@@ -226,6 +238,128 @@ const updateStyle = (keyOrNull, valueOrStyles) => {
             </Form.Group>
           );
         })}
+      </div>
+    );
+  };
+  // Helper to render width/height sliders with unit and auto toggle for height
+  const renderSizeControl = () => {
+    // Width
+    const widthRaw = mergedStyles.width || '';
+    const [widthNum, widthUnit] = parseValueUnit(widthRaw || '0px');
+
+    // Height
+    const heightRaw = mergedStyles.height || '';
+    const isHeightAuto = heightRaw === 'auto' || heightRaw === '';
+    const [heightNum, heightUnit] = isHeightAuto ? [0, 'px'] : parseValueUnit(heightRaw);
+
+    // Update handlers
+    const updateWidth = (valueNum, unit) => {
+      updateStyle('width', `${valueNum}${unit}`);
+    };
+
+    const updateHeight = (valueNum, unit) => {
+      updateStyle('height', `${valueNum}${unit}`);
+    };
+
+    const toggleHeightAuto = (checked) => {
+      if (checked) {
+        updateStyle('height', 'auto');
+      } else {
+        // default fallback to 0px when auto disabled
+        updateStyle('height', '0px');
+      }
+    };
+
+    return (
+      <div className="mb-4">
+        <h6 className="mb-3">Size</h6>
+
+        {/* Width */}
+        <Form.Group className="mb-3">
+          <Form.Label>Width</Form.Label>
+          <Row>
+            <Col xs={3}>
+              <Form.Control
+                type="number"
+                min={0}
+                max={widthUnit === '%' ? 100 : 1000}
+                step={1}
+                value={widthNum}
+                onChange={(e) => updateWidth(parseFloat(e.target.value) || 0, widthUnit)}
+              />
+            </Col>
+            <Col xs={6}>
+              <Form.Range
+                min={0}
+                max={widthUnit === '%' ? 100 : 1000}
+                step={1}
+                value={widthNum}
+                onChange={(e) => updateWidth(parseFloat(e.target.value), widthUnit)}
+              />
+            </Col>
+            <Col xs={3}>
+              <Form.Select
+                size="sm"
+                value={widthUnit}
+                onChange={(e) => updateWidth(widthNum, e.target.value)}
+              >
+                <option value="px">px</option>
+                <option value="%">%</option>
+                <option value="rem">rem</option>
+                <option value="em">em</option>
+              </Form.Select>
+            </Col>
+          </Row>
+        </Form.Group>
+
+        {/* Height */}
+        <Form.Group className="mb-3">
+          <Form.Check
+            type="checkbox"
+            id="height-auto"
+            label="Height: auto"
+            checked={isHeightAuto}
+            onChange={(e) => toggleHeightAuto(e.target.checked)}
+            className="mb-2"
+          />
+          <Form.Label>Height</Form.Label>
+          <Row>
+            <Col xs={3}>
+              <Form.Control
+                type="number"
+                min={0}
+                max={1000}
+                step={1}
+                value={heightNum}
+                disabled={isHeightAuto}
+                onChange={(e) => updateHeight(parseFloat(e.target.value) || 0, heightUnit)}
+              />
+            </Col>
+            <Col xs={6}>
+              <Form.Range
+                min={0}
+                max={1000}
+                step={1}
+                value={heightNum}
+                disabled={isHeightAuto}
+                onChange={(e) => updateHeight(parseFloat(e.target.value), heightUnit)}
+              />
+            </Col>
+            <Col xs={3}>
+              <Form.Select
+                size="sm"
+                value={heightUnit}
+                disabled={isHeightAuto}
+                onChange={(e) => updateHeight(heightNum, e.target.value)}
+              >
+                <option value="px">px</option>
+                <option value="%">%</option>
+                <option value="rem">rem</option>
+                <option value="em">em</option>
+              </Form.Select>
+            </Col>
+          </Row>
+        </Form.Group>
       </div>
     );
   };   
@@ -486,6 +620,7 @@ const updateStyle = (keyOrNull, valueOrStyles) => {
     <>
       {renderMarginPaddingControl('margin')}
       {renderMarginPaddingControl('padding')}
+      {renderSizeControl()}
     </>
   );
 
@@ -516,22 +651,26 @@ const updateStyle = (keyOrNull, valueOrStyles) => {
         <Tab.Content>
           <Tab.Pane eventKey={selectedDevice}>
             <Accordion defaultActiveKey="0" flush>
-              <Accordion.Item eventKey="0">
-                <Accordion.Header>Text Options</Accordion.Header>
-                <Accordion.Body>{renderTextOptions()}</Accordion.Body>
-              </Accordion.Item>
 
               <Accordion.Item eventKey="1">
+                <Accordion.Header>Content Editor</Accordion.Header>
+                <Accordion.Body>
+                  {renderTextOptions()}
+                  <RichTextEditor initialHtml={content} onChange={updateContent} />
+                </Accordion.Body>
+              </Accordion.Item>
+
+              <Accordion.Item eventKey="2">
                 <Accordion.Header>Shadow Effects</Accordion.Header>
                 <Accordion.Body>{renderShadowOptions()}</Accordion.Body>
               </Accordion.Item>
 
-              <Accordion.Item eventKey="2">
+              <Accordion.Item eventKey="3">
                 <Accordion.Header>Layout (Margin & Padding)</Accordion.Header>
                 <Accordion.Body>{renderLayoutOptions()}</Accordion.Body>
               </Accordion.Item>
 
-              <Accordion.Item eventKey="3">
+              <Accordion.Item eventKey="4">
                 <Accordion.Header>Background</Accordion.Header>
                 <Accordion.Body>{renderBackgroundOptions()}</Accordion.Body>
               </Accordion.Item>

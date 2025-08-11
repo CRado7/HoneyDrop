@@ -17,74 +17,6 @@ const baseStyles = {
     fontFamily: 'Arial, sans-serif',
   };
   
-  const cardInspectorFields = [
-    {
-      key: 'styles.width',
-      label: 'Width',
-      type: 'slider',
-      config: {
-        min: 100,
-        max: 800,
-        step: 1,
-        units: ['px', '%'],
-        defaultUnit: 'px',
-        defaultValue: 400,
-      },
-    },
-    {
-      key: 'styles.backgroundColor',
-      label: 'Background Color',
-      type: 'color',
-    },
-    {
-      key: 'styles.borderRadius',
-      label: 'Border Radius',
-      type: 'slider',
-      config: {
-        min: 0,
-        max: 48,
-        step: 1,
-        units: ['px'],
-        defaultUnit: 'px',
-      },
-    },
-    {
-      key: 'styles.boxShadowOffsetX',
-      label: 'Box Shadow Offset X',
-      type: 'slider',
-      config: { min: -20, max: 20, step: 1, units: ['px'], defaultUnit: 'px', defaultValue: 0 },
-    },
-    {
-      key: 'styles.boxShadowOffsetY',
-      label: 'Box Shadow Offset Y',
-      type: 'slider',
-      config: { min: -20, max: 20, step: 1, units: ['px'], defaultUnit: 'px', defaultValue: 2 },
-    },
-    {
-      key: 'styles.boxShadowBlur',
-      label: 'Box Shadow Blur',
-      type: 'slider',
-      config: { min: 0, max: 40, step: 1, units: ['px'], defaultUnit: 'px', defaultValue: 8 },
-    },
-    {
-      key: 'styles.boxShadowSpread',
-      label: 'Box Shadow Spread',
-      type: 'slider',
-      config: { min: 0, max: 20, step: 1, units: ['px'], defaultUnit: 'px', defaultValue: 0 },
-    },
-    {
-      key: 'styles.boxShadowColor',
-      label: 'Box Shadow Color',
-      type: 'color',
-      config: { defaultValue: 'rgba(0,0,0,0.05)' },
-    },
-    {
-        key: 'content',
-        label: 'Content (HTML)',
-        type: 'textarea',
-    },
-  ];
-  
   const cards = [
     {
       category: 'Cards',
@@ -95,7 +27,6 @@ const baseStyles = {
         styles: { ...baseStyles },
         content: '<h3>Card Title</h3><p>This is a basic card with content inside.</p>',
       },
-      inspectorFields: cardInspectorFields,
     },
     {
       category: 'Cards',
@@ -111,7 +42,6 @@ const baseStyles = {
             <p>This card includes an image at the top.</p>
           </div>`,
       },
-      inspectorFields: cardInspectorFields,
     },
     {
       category: 'Cards',
@@ -125,7 +55,6 @@ const baseStyles = {
           <div style="padding: 12px 0;">This is the body content of the card.</div>
           <div style="border-top: 1px solid #ddd; padding-top: 8px; text-align: right;"><em>Footer</em></div>`,
       },
-      inspectorFields: cardInspectorFields,
     },
     {
       category: 'Cards',
@@ -139,7 +68,6 @@ const baseStyles = {
           <h4>Jane Doe</h4>
           <p>Frontend Developer</p>`,
       },
-      inspectorFields: cardInspectorFields,
     },
   ];  
 
