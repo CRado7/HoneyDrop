@@ -185,7 +185,17 @@ const updateStyle = (keyOrNull, valueOrStyles) => {
                 {disabled ? '' : currentUnit}
               </Form.Label>
               <Row>
-                <Col xs={9}>
+                <Col xs={3}>
+                  <Form.Control
+                    type="number"
+                    value={disabled ? 0 : valueNum}
+                    disabled={disabled}
+                    onChange={(e) =>
+                      onSliderChange(side, parseFloat(e.target.value) || 0, currentUnit)
+                    }
+                  />
+                </Col>
+                <Col xs={6}>
                   <Form.Range
                     min={-100}
                     max={100}
@@ -232,10 +242,20 @@ const updateStyle = (keyOrNull, valueOrStyles) => {
         <Form.Group className="mb-3">
           <Form.Label>Font Size</Form.Label>
           <Row>
-            <Col xs={9}>
+            <Col xs={3}>
+              <Form.Control
+                type="number"
+                min={fontSizeUnit === '%' ? 0 : 8}
+                max={fontSizeUnit === '%' ? 100 : 72}
+                step={1}
+                value={fontSizeNum}
+                onChange={(e) => updateStyle('fontSize', `${e.target.value}${fontSizeUnit}`)}
+              />
+            </Col>
+            <Col xs={6}>
               <Form.Range
-                min={8}
-                max={72}
+                min={fontSizeUnit === '%' ? 0 : 8}
+                max={fontSizeUnit === '%' ? 100 : 72}
                 step={1}
                 value={fontSizeNum}
                 onChange={(e) => updateStyle('fontSize', `${e.target.value}${fontSizeUnit}`)}
@@ -375,7 +395,14 @@ const updateStyle = (keyOrNull, valueOrStyles) => {
                 <Form.Label>{label}</Form.Label>
               </OverlayTrigger>
               <Row>
-                <Col xs={9}>
+                <Col xs={3}>
+                  <Form.Control
+                    type="number"
+                    value={valueNum}
+                    onChange={(e) => updateStyle(key, `${e.target.value}${unit}`)}
+                  />
+                </Col>
+                <Col xs={6}>
                   <Form.Range
                     min={-100}
                     max={100}
