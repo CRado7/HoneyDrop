@@ -3,17 +3,47 @@ import {
   Form,
   Row,
   Col,
+  Accordion,
   ButtonGroup,
   ToggleButton,
-  Tab,
   Nav,
+  Tab,
   OverlayTrigger,
   Tooltip,
-  Accordion,
 } from 'react-bootstrap';
 import { BsTextLeft, BsTextCenter, BsTextRight } from 'react-icons/bs';
-// import DeepEditableHtml from './DeepEditableHtml';
 import RichTextEditor from './RichTextEditor';
+
+// Your global default styles (seed defaults)
+const GLOBAL_DEFAULT_STYLES = {
+  fontSize: '16px',
+  fontWeight: 'normal',
+  color: '#000000',
+  fontFamily: 'Arial, sans-serif',
+  lineHeight: '1.6',
+  letterSpacing: '0px',
+
+  marginTop: '0px',
+  marginRight: '0px',
+  marginBottom: '16px',
+  marginLeft: '0px',
+
+  paddingTop: '0px',
+  paddingRight: '0px',
+  paddingBottom: '0px',
+  paddingLeft: '0px',
+
+  textAlign: 'left',
+
+  boxShadowOffsetX: '0px',
+  boxShadowOffsetY: '0px',
+  boxShadowBlur: '0px',
+  boxShadowSpread: '0px',
+  boxShadowColor: '#000000',
+  
+  backgroundColor: 'transparent',
+  backgroundImage: '',
+};
 
 function getNestedValue(obj, path) {
   return path.split('.').reduce((acc, part) => acc?.[part], obj);
@@ -33,7 +63,6 @@ function updateNestedValue(obj, path, value) {
     }
     current = current[part];
   }
-
   current[last] = value;
   return newObj;
 }
@@ -45,23 +74,44 @@ export default function Inspector({ component, onUpdate }) {
 
   if (!component) return <p>Select an element to edit its content</p>;
 
-  const fields = component.inspectorFields || [];
   const defaults = component.defaults || {};
+  // Merge global defaults with current styles (flatten)
+  // Use only styles, ignore device-specific styles here for simplicity
+  const mergedStyles = { ...GLOBAL_DEFAULT_STYLES, ...defaults.styles };
 
-  const getStyle = (key) => getNestedValue(defaults, key) ?? '';
-  const updateStyle = (key, value) => {
-    const updatedDefaults = updateNestedValue(defaults, key, value);
-    onUpdate('defaults', updatedDefaults);
+  // Update style for key (flat style keys)
+// Adjust your updateStyle to accept either a key/value or full styles update
+const updateStyle = (keyOrNull, valueOrStyles) => {
+  const updatedDefaults = { ...defaults };
+  if (keyOrNull === null && typeof valueOrStyles === 'object') {
+    // Update entire styles object at once
+    updatedDefaults.styles = { ...valueOrStyles };
+  } else {
+    // Update single key
+    updatedDefaults.styles = { ...mergedStyles, [keyOrNull]: valueOrStyles };
+  }
+  onUpdate('defaults', updatedDefaults);
+};
+
+
+  // Helper to parse number + unit from string like "16px"
+  const parseValueUnit = (raw) => {
+    const match = /^(-?\d+(\.\d+)?)([a-z%]*)$/.exec(raw);
+    if (!match) return [0, 'px'];
+    return [parseFloat(match[1]), match[3] || 'px'];
   };
 
+  // Renders sliders for margin/padding sides grouped by type
   const renderMarginPaddingControl = (type) => {
     const sides = ['Top', 'Right', 'Bottom', 'Left'];
     const isMargin = type.toLowerCase() === 'margin';
   
-    // Note: No device here since styles are flat
-    const margin = getStyle(`styles.${type}`) || '';
-    const marginLeft = getStyle(`styles.${type}Left`) || '';
-    const marginRight = getStyle(`styles.${type}Right`) || '';
+    // Get the flat styles object
+    const margin = mergedStyles[`${type}`] || '';
+    const marginLeft = mergedStyles[`${type}Left`] || '';
+    const marginRight = mergedStyles[`${type}Right`] || '';
+  
+    // marginAuto true if either shorthand "0 auto" or left+right are 'auto'
     const marginAuto =
       isMargin &&
       (
@@ -69,30 +119,43 @@ export default function Inspector({ component, onUpdate }) {
         (marginLeft === 'auto' && marginRight === 'auto')
       );
   
-      const toggleMarginAuto = (checked) => {
-        if (!isMargin) return;
-      
-        let updatedDefaults = { ...defaults };
-      
-        if (checked) {
-          const marginTop = getStyle(`styles.${type}Top`) || '0px';
-          const marginBottom = getStyle(`styles.${type}Bottom`) || '0px';
-      
-          updatedDefaults = updateNestedValue(updatedDefaults, `styles.${type}`, '');
-          updatedDefaults = updateNestedValue(updatedDefaults, `styles.${type}Left`, 'auto');
-          updatedDefaults = updateNestedValue(updatedDefaults, `styles.${type}Right`, 'auto');
-          updatedDefaults = updateNestedValue(updatedDefaults, `styles.${type}Top`, marginTop);
-          updatedDefaults = updateNestedValue(updatedDefaults, `styles.${type}Bottom`, marginBottom);
-        } else {
-          updatedDefaults = updateNestedValue(updatedDefaults, `styles.${type}`, '');
-          updatedDefaults = updateNestedValue(updatedDefaults, `styles.${type}Left`, '0px');
-          updatedDefaults = updateNestedValue(updatedDefaults, `styles.${type}Right`, '0px');
-          updatedDefaults = updateNestedValue(updatedDefaults, `styles.${type}Top`, '0px');
-          updatedDefaults = updateNestedValue(updatedDefaults, `styles.${type}Bottom`, '0px');
-        }
-      
-        onUpdate('defaults', updatedDefaults);
-      };   
+    // Toggle margin auto on/off
+    const toggleMarginAuto = (checked) => {
+      if (!isMargin) return;
+  
+      let newStyles = { ...mergedStyles };
+  
+      if (checked) {
+        // Preserve top and bottom, clear margin shorthand, set left/right to auto
+        newStyles[`${type}`] = '';
+        newStyles[`${type}Left`] = 'auto';
+        newStyles[`${type}Right`] = 'auto';
+        newStyles[`${type}Top`] = newStyles[`${type}Top`] || '0px';
+        newStyles[`${type}Bottom`] = newStyles[`${type}Bottom`] || '0px';
+      } else {
+        // Remove auto and reset left/right to 0px, clear shorthand
+        newStyles[`${type}`] = '';
+        newStyles[`${type}Left`] = '0px';
+        newStyles[`${type}Right`] = '0px';
+        newStyles[`${type}Top`] = newStyles[`${type}Top`] || '0px';
+        newStyles[`${type}Bottom`] = newStyles[`${type}Bottom`] || '0px';
+      }
+  
+      updateStyle(null, newStyles); // update whole styles object
+    };
+  
+    // Handle slider changes for individual sides
+    const onSliderChange = (side, valueNum, unit) => {
+      let newStyles = { ...mergedStyles };
+  
+      // Prevent changes to left/right if marginAuto enabled
+      if (isMargin && marginAuto && (side === 'Left' || side === 'Right')) {
+        return;
+      }
+  
+      newStyles[`${type}${side}`] = `${valueNum}${unit}`;
+      updateStyle(null, newStyles);
+    };
   
     return (
       <div className="mb-4">
@@ -110,20 +173,15 @@ export default function Inspector({ component, onUpdate }) {
         )}
   
         {sides.map((side) => {
-          const key = `styles.${type}${side}`;
-          const rawValue = getStyle(key) || '';
-          const match = /^(-?\d+(?:\.\d+)?)(\D+)?$/.exec(rawValue);
-          const valueNum = match ? parseFloat(match[1]) : 0;
-          const currentUnit = match?.[2] ?? 'px';
+          const rawValue = mergedStyles[`${type}${side}`] || '0px';
+          const [valueNum, currentUnit] = parseValueUnit(rawValue);
   
-          const disabled =
-            isMargin && marginAuto && (side === 'Left' || side === 'Right');
+          const disabled = isMargin && marginAuto && (side === 'Left' || side === 'Right');
   
           return (
-            <Form.Group key={`${key}-slider`} className="mb-2">
+            <Form.Group key={`${type}${side}-slider`} className="mb-2">
               <Form.Label>
-                {type.charAt(0).toUpperCase() + type.slice(1)} {side}:{' '}
-                {disabled ? 'auto' : valueNum}
+                {type.charAt(0).toUpperCase() + type.slice(1)} {side}: {disabled ? 'auto' : valueNum}
                 {disabled ? '' : currentUnit}
               </Form.Label>
               <Row>
@@ -135,7 +193,7 @@ export default function Inspector({ component, onUpdate }) {
                     value={disabled ? 0 : valueNum}
                     disabled={disabled}
                     onChange={(e) =>
-                      updateStyle(key, `${e.target.value}${currentUnit}`)
+                      onSliderChange(side, parseFloat(e.target.value), currentUnit)
                     }
                   />
                 </Col>
@@ -145,7 +203,7 @@ export default function Inspector({ component, onUpdate }) {
                     value={currentUnit}
                     disabled={disabled}
                     onChange={(e) =>
-                      updateStyle(key, `${valueNum}${e.target.value}`)
+                      onSliderChange(side, valueNum, e.target.value)
                     }
                   >
                     <option value="px">px</option>
@@ -162,47 +220,219 @@ export default function Inspector({ component, onUpdate }) {
     );
   };   
 
-  const renderTextAlignControl = () => {
-    const alignment = getStyle(`styles.${selectedDevice}.textAlign`) || 'left';
-
-    const options = [
-      { value: 'left', icon: <BsTextLeft />, tooltip: 'Align Left' },
-      { value: 'center', icon: <BsTextCenter />, tooltip: 'Align Center' },
-      { value: 'right', icon: <BsTextRight />, tooltip: 'Align Right' },
-    ];
+  // Render Text Options section
+  const renderTextOptions = () => {
+    // TextAlign with button group and tooltip
+    const alignment = mergedStyles.textAlign || 'left';
+    const fontSizeRaw = mergedStyles.fontSize || '16px';
+    const [fontSizeNum, fontSizeUnit] = parseValueUnit(fontSizeRaw);
 
     return (
-      <Form.Group className="mb-3">
-        <Form.Label>Text Align</Form.Label>
-        <ButtonGroup>
-          {options.map(({ value, icon, tooltip }) => (
-            <OverlayTrigger
-              key={value}
-              placement="top"
-              overlay={<Tooltip>{tooltip}</Tooltip>}
-            >
+      <>
+        <Form.Group className="mb-3">
+          <Form.Label>Font Size</Form.Label>
+          <Row>
+            <Col xs={9}>
+              <Form.Range
+                min={8}
+                max={72}
+                step={1}
+                value={fontSizeNum}
+                onChange={(e) => updateStyle('fontSize', `${e.target.value}${fontSizeUnit}`)}
+              />
+            </Col>
+            <Col xs={3}>
+              <Form.Select
+                size="sm"
+                value={fontSizeUnit}
+                onChange={(e) => updateStyle('fontSize', `${fontSizeNum}${e.target.value}`)}
+              >
+                <option value="px">px</option>
+                <option value="rem">rem</option>
+                <option value="em">em</option>
+                <option value="%">%</option>
+              </Form.Select>
+            </Col>
+          </Row>
+        </Form.Group>
+
+        <Form.Group className="mb-3">
+          <Form.Label>Font Weight</Form.Label>
+          <Form.Select
+            value={mergedStyles.fontWeight || 'normal'}
+            onChange={(e) => updateStyle('fontWeight', e.target.value)}
+          >
+            {['normal', 'bold', 'bolder', 'lighter', '100', '200', '300', '400', '500', '600', '700', '800', '900'].map((w) => (
+              <option key={w} value={w}>{w}</option>
+            ))}
+          </Form.Select>
+        </Form.Group>
+
+        <Form.Group className="mb-3">
+          <Form.Label>Font Family</Form.Label>
+          <Form.Control
+            type="text"
+            value={mergedStyles.fontFamily || ''}
+            onChange={(e) => updateStyle('fontFamily', e.target.value)}
+            placeholder="e.g. Arial, sans-serif"
+          />
+        </Form.Group>
+
+        <Form.Group className="mb-3">
+          <Form.Label>Color</Form.Label>
+          <Form.Control
+            type="color"
+            value={/^#[0-9A-Fa-f]{6}$/.test(mergedStyles.color) ? mergedStyles.color : '#000000'}
+            onChange={(e) => updateStyle('color', e.target.value)}
+          />
+        </Form.Group>
+
+        <Form.Group className="mb-3">
+          <Form.Label>Line Height</Form.Label>
+          <Form.Control
+            type="number"
+            step="0.1"
+            min="0"
+            value={parseFloat(mergedStyles.lineHeight) || 1.6}
+            onChange={(e) => updateStyle('lineHeight', e.target.value)}
+          />
+        </Form.Group>
+
+        <Form.Group className="mb-3">
+          <Form.Label>Letter Spacing</Form.Label>
+          <Row>
+            <Col xs={9}>
+              <Form.Range
+                min={-5}
+                max={20}
+                step={0.1}
+                value={parseFloat(mergedStyles.letterSpacing) || 0}
+                onChange={(e) => updateStyle('letterSpacing', `${e.target.value}px`)}
+              />
+            </Col>
+            <Col xs={3}>
+              <Form.Text>px</Form.Text>
+            </Col>
+          </Row>
+        </Form.Group>
+
+        <Form.Group className="mb-3">
+          <Form.Label>Text Align</Form.Label>
+          <ButtonGroup>
+            {[
+              { value: 'left', icon: <BsTextLeft /> },
+              { value: 'center', icon: <BsTextCenter /> },
+              { value: 'right', icon: <BsTextRight /> },
+            ].map(({ value, icon }) => (
               <ToggleButton
-                id={`align-${value}`}
+                key={value}
+                id={`text-align-${value}`}
                 type="radio"
                 variant="outline-secondary"
-                name="align"
+                name="textAlign"
                 value={value}
                 checked={alignment === value}
-                onChange={(e) =>
-                  updateStyle(`styles.${selectedDevice}.textAlign`, e.currentTarget.value)
-                }
+                onChange={(e) => updateStyle('textAlign', e.currentTarget.value)}
               >
                 {icon}
               </ToggleButton>
-            </OverlayTrigger>
-          ))}
-        </ButtonGroup>
-      </Form.Group>
+            ))}
+          </ButtonGroup>
+        </Form.Group>
+      </>
     );
   };
 
+  // Render Shadow Effects section
+  const renderShadowEffects = () => {
+    // For each shadow property, parse number/unit
+    const props = [
+      { key: 'boxShadowOffsetX', label: 'Offset X' },
+      { key: 'boxShadowOffsetY', label: 'Offset Y' },
+      { key: 'boxShadowBlur', label: 'Blur' },
+      { key: 'boxShadowSpread', label: 'Spread' },
+    ];
+
+    return (
+      <>
+        {props.map(({ key, label }) => {
+          const rawValue = mergedStyles[key] || '0px';
+          const [valueNum, unit] = parseValueUnit(rawValue);
+          return (
+            <Form.Group key={key} className="mb-3">
+              <Form.Label>{label}</Form.Label>
+              <Row>
+                <Col xs={9}>
+                  <Form.Range
+                    min={-100}
+                    max={100}
+                    step={1}
+                    value={valueNum}
+                    onChange={(e) => updateStyle(key, `${e.target.value}${unit}`)}
+                  />
+                </Col>
+                <Col xs={3}>
+                  <Form.Select
+                    size="sm"
+                    value={unit}
+                    onChange={(e) => updateStyle(key, `${valueNum}${e.target.value}`)}
+                  >
+                    <option value="px">px</option>
+                    <option value="rem">rem</option>
+                    <option value="em">em</option>
+                  </Form.Select>
+                </Col>
+              </Row>
+            </Form.Group>
+          );
+        })}
+
+        <Form.Group className="mb-3">
+          <Form.Label>Shadow Color</Form.Label>
+          <Form.Control
+            type="color"
+            value={/^#[0-9A-Fa-f]{6}$/.test(mergedStyles.boxShadowColor) ? mergedStyles.boxShadowColor : '#000000'}
+            onChange={(e) => updateStyle('boxShadowColor', e.target.value)}
+          />
+        </Form.Group>
+      </>
+    );
+  };
+
+  // Render Background section
+  const renderBackgroundOptions = () => (
+    <>
+      <Form.Group className="mb-3">
+        <Form.Label>Background Color</Form.Label>
+        <Form.Control
+          type="color"
+          value={/^#[0-9A-Fa-f]{6}$/.test(mergedStyles.backgroundColor) ? mergedStyles.backgroundColor : '#ffffff'}
+          onChange={(e) => updateStyle('backgroundColor', e.target.value)}
+        />
+      </Form.Group>
+
+      <Form.Group className="mb-3">
+        <Form.Label>Background Image URL</Form.Label>
+        <Form.Control
+          type="text"
+          value={mergedStyles.backgroundImage || ''}
+          onChange={(e) => updateStyle('backgroundImage', e.target.value)}
+          placeholder="e.g. https://example.com/image.png"
+        />
+      </Form.Group>
+    </>
+  );
+
+  // Render Layout section (margin, padding)
+  const renderLayoutOptions = () => (
+    <>
+      {renderMarginPaddingControl('margin')}
+      {renderMarginPaddingControl('padding')}
+    </>
+  );
+
   return (
-    <div className="vh-100" style={{ overflowY: 'scroll' }}>
+    <div className="vh-100" style={{ overflowY: 'auto', padding: '1rem' }}>
       <h5>Inspector</h5>
       <p>
         Editing: <strong>{component.label || component.type}</strong>
@@ -221,142 +451,25 @@ export default function Inspector({ component, onUpdate }) {
 
         <Tab.Content>
           <Tab.Pane eventKey={selectedDevice}>
-            {fields.map(({ key, label, type, options, config }) => {
-              const currentValue = getNestedValue(defaults, key) ?? '';
-
-              switch (type) {
-                case 'text':
-                  return (
-                    <Form.Group key={key} className="mb-3">
-                      <Form.Label>{label}</Form.Label>
-                      <Form.Control
-                        type="text"
-                        value={currentValue}
-                        onChange={(e) => updateStyle(key, e.target.value)}
-                      />
-                    </Form.Group>
-                  );
-
-                  case 'textarea':
-                    if (key === 'content') {
-                      return (
-                        <Form.Group key={key} className="mb-3">
-                          <Form.Label>{label}</Form.Label>
-                          <RichTextEditor
-                            initialHtml={currentValue || ''}
-                            onChange={(newHtml) => updateStyle(key, newHtml)}
-                          />
-                        </Form.Group>
-                      );                 
-                    }
-                    // fallback to normal textarea
-                    return (
-                      <Form.Group key={key} className="mb-3">
-                        <Form.Label>{label}</Form.Label>
-                        <Form.Control
-                          as="textarea"
-                          rows={6}
-                          value={currentValue}
-                          onChange={(e) => updateStyle(key, e.target.value)}
-                        />
-                      </Form.Group>
-                    );
-
-                case 'select':
-                  return (
-                    <Form.Group key={key} className="mb-3">
-                      <Form.Label>{label}</Form.Label>
-                      <Form.Select
-                        value={currentValue}
-                        onChange={(e) => updateStyle(key, e.target.value)}
-                      >
-                        {options?.map((opt) => (
-                          <option key={opt} value={opt}>
-                            {opt}
-                          </option>
-                        ))}
-                      </Form.Select>
-                    </Form.Group>
-                  );
-
-                case 'color':
-                  return (
-                    <Form.Group key={key} className="mb-3">
-                      <Form.Label>{label}</Form.Label>
-                      <Form.Control
-                        type="color"
-                        value={/^#[0-9A-Fa-f]{6}$/.test(currentValue) ? currentValue : '#000000'}
-                        onChange={(e) => updateStyle(key, e.target.value)}
-                      />
-                    </Form.Group>
-                  );
-
-                case 'slider': {
-                  const {
-                    min = 0,
-                    max = 100,
-                    step = 1,
-                    units = ['px'],
-                    defaultUnit = 'px',
-                  } = config || {};
-
-                  const match = /^(-?\d+(?:\.\d+)?)(\D+)?$/.exec(currentValue);
-                  const valueNum = match ? parseFloat(match[1]) : 0;
-                  const currentUnit = match?.[2] ?? defaultUnit;
-
-                  return (
-                    <Form.Group key={key} className="mb-3">
-                      <Form.Label>
-                        {label}: {valueNum}
-                        {currentUnit}
-                      </Form.Label>
-                      <Row>
-                        <Col xs={9}>
-                          <Form.Range
-                            min={min}
-                            max={max}
-                            step={step}
-                            value={valueNum}
-                            onChange={(e) =>
-                              updateStyle(key, `${e.target.value}${currentUnit}`)
-                            }
-                          />
-                        </Col>
-                        <Col xs={3}>
-                          {units.length > 1 && (
-                            <Form.Select
-                              size="sm"
-                              value={currentUnit}
-                              onChange={(e) =>
-                                updateStyle(key, `${valueNum}${e.target.value}`)
-                              }
-                            >
-                              {units.map((u) => (
-                                <option key={u} value={u}>
-                                  {u}
-                                </option>
-                              ))}
-                            </Form.Select>
-                          )}
-                        </Col>
-                      </Row>
-                    </Form.Group>
-                  );
-                }
-
-                default:
-                  return null;
-              }
-            })}
-
-            <Accordion defaultActiveKey="0" className="mt-4">
+            <Accordion defaultActiveKey="0" flush>
               <Accordion.Item eventKey="0">
-                <Accordion.Header>Layout Controls</Accordion.Header>
-                <Accordion.Body>
-                  {renderMarginPaddingControl('margin')}
-                  {renderMarginPaddingControl('padding')}
-                  {renderTextAlignControl()}
-                </Accordion.Body>
+                <Accordion.Header>Text Options</Accordion.Header>
+                <Accordion.Body>{renderTextOptions()}</Accordion.Body>
+              </Accordion.Item>
+
+              <Accordion.Item eventKey="1">
+                <Accordion.Header>Shadow Effects</Accordion.Header>
+                <Accordion.Body>{renderShadowEffects()}</Accordion.Body>
+              </Accordion.Item>
+
+              <Accordion.Item eventKey="2">
+                <Accordion.Header>Layout (Margin & Padding)</Accordion.Header>
+                <Accordion.Body>{renderLayoutOptions()}</Accordion.Body>
+              </Accordion.Item>
+
+              <Accordion.Item eventKey="3">
+                <Accordion.Header>Background</Accordion.Header>
+                <Accordion.Body>{renderBackgroundOptions()}</Accordion.Body>
               </Accordion.Item>
             </Accordion>
           </Tab.Pane>
