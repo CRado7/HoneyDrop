@@ -6,7 +6,7 @@ import { useDrop } from 'react-dnd';
 import '../styles/Editor.css';
 
 import ComponentLibraryPanel from './ComponentLibraryPanel';
-import Inspector from './Inspector';
+import Inspector from './Inspector/Inspector';
 import CanvasItem from './CanvasItem';
 
 export default function EditorCanvas() {
@@ -14,6 +14,14 @@ export default function EditorCanvas() {
   const [elements, setElements] = useState([]);
   const [selectedIndex, setSelectedIndex] = useState(null);
   const [devicePreview, setDevicePreview] = useState('desktop');
+  const [bodyStyles, setBodyStyles] = useState({ /* initial body styles */ });
+
+  const handleUpdateBodyStyle = (key, value) => {
+    setBodyStyles(prev => ({
+      ...prev,
+      [key]: value,
+    }));
+  };
 
   const [, drop] = useDrop(() => ({
     accept: 'component',
@@ -39,6 +47,7 @@ export default function EditorCanvas() {
       setElements(updated);
     }
   };
+  
   const handleUpdate = ({ key, value, index }) => {
     if (!key) return; // guard against empty/undefined key
   
@@ -135,6 +144,8 @@ export default function EditorCanvas() {
               if (selectedIndex == null) return;
               handleUpdate({ key, value, index: selectedIndex });
             }}
+            bodyStyles={bodyStyles}
+            onUpdateBodyStyles={handleUpdateBodyStyle}
           />
         </div>
       </div>

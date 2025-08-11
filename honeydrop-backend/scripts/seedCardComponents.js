@@ -5,11 +5,15 @@ import ComponentLibrary from '../src/models/ComponentLibrary.js';
 dotenv.config();
 const MONGO_URI = process.env.MONGO_URI;
 
-const baseStyles = {
+  const baseStyles = {
     padding: '16px',
     backgroundColor: '#ffffff',
     borderRadius: '8px',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+    boxShadowOffsetX: '0px',
+    boxShadowOffsetY: '2px',
+    boxShadowBlur: '8px',
+    boxShadowSpread: '0px',
+    boxShadowColor: '#0000000d', // rgba(0,0,0,0.05) hex approx
     width: '400px',
     height: 'auto',
     color: '#000000',

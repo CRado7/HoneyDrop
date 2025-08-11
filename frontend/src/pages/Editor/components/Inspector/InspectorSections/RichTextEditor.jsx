@@ -10,13 +10,14 @@ import { Button, ButtonGroup, Form, OverlayTrigger, Tooltip } from 'react-bootst
 import { BsTypeBold, BsTypeItalic, BsTypeUnderline, BsFillPaletteFill } from 'react-icons/bs';
 
 import { ChromePicker } from 'react-color';
+import FontList from '../../../../../data/systemFonts';
+
 
 const MENU_ITEMS = [
   { action: 'toggleBold', label: 'Bold' },
   { action: 'toggleItalic', label: 'Italic' },
   { action: 'toggleUnderline', label: 'Underline' },
   { action: 'setFontSize', label: 'Font Size', options: ['12px', '14px', '16px', '18px', '24px', '32px'] },
-  { action: 'setFontFamily', label: 'Font Family', options: ['Arial', 'Georgia', 'Tahoma', 'Times New Roman', 'Verdana'] },
 ];
 
 export default function RichTextEditor({ initialHtml = '', onChange }) {
@@ -131,10 +132,11 @@ export default function RichTextEditor({ initialHtml = '', onChange }) {
         style={{ width: 'auto' }}
       >
         <option value="" disabled>Font Family</option>
-        {MENU_ITEMS.find(i => i.action === 'setFontFamily').options.map(family => (
+        {FontList.map((family) => (
           <option key={family} value={family}>{family}</option>
         ))}
       </Form.Select>
+
 
       <EditorContent
         editor={editor}

@@ -15,6 +15,7 @@ export const GET_PAGES_BY_SITE = gql`
         title
         description
       }
+      body
       sections {
         id
         type
@@ -46,6 +47,7 @@ export const GET_PAGE_BY_ID = gql`
         title
         description
       }
+      body
       sections {
         id
         type
@@ -70,6 +72,7 @@ export const CREATE_PAGE = gql`
       id
       title
       slug
+      body
     }
   }
 `;
@@ -80,6 +83,7 @@ export const UPDATE_PAGE = gql`
       id
       title
       slug
+      body
     }
   }
 `;
