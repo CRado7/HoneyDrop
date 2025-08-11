@@ -345,22 +345,35 @@ const updateStyle = (keyOrNull, valueOrStyles) => {
 
   // Render Shadow Effects section
   const renderShadowEffects = () => {
-    // For each shadow property, parse number/unit
-    const props = [
+    const boxShadowProps = [
       { key: 'boxShadowOffsetX', label: 'Offset X' },
       { key: 'boxShadowOffsetY', label: 'Offset Y' },
       { key: 'boxShadowBlur', label: 'Blur' },
       { key: 'boxShadowSpread', label: 'Spread' },
     ];
-
-    return (
-      <>
-        {props.map(({ key, label }) => {
+  
+    const textShadowProps = [
+      { key: 'textShadowOffsetX', label: 'Offset X' },
+      { key: 'textShadowOffsetY', label: 'Offset Y' },
+      { key: 'textShadowBlur', label: 'Blur' },
+    ];
+  
+    // Helper to render a group of sliders
+    const renderShadowGroup = (title, propsArray, colorKey) => (
+      <div className="mb-4">
+        <h6 className="mb-3">{title}</h6>
+  
+        {propsArray.map(({ key, label }) => {
           const rawValue = mergedStyles[key] || '0px';
           const [valueNum, unit] = parseValueUnit(rawValue);
           return (
             <Form.Group key={key} className="mb-3">
-              <Form.Label>{label}</Form.Label>
+              <OverlayTrigger
+                placement="top"
+                overlay={<Tooltip id={`${key}-tooltip`}>{`Adjust the ${label.toLowerCase()} of ${title.toLowerCase()}.`}</Tooltip>}
+              >
+                <Form.Label>{label}</Form.Label>
+              </OverlayTrigger>
               <Row>
                 <Col xs={9}>
                   <Form.Range
@@ -386,18 +399,36 @@ const updateStyle = (keyOrNull, valueOrStyles) => {
             </Form.Group>
           );
         })}
-
-        <Form.Group className="mb-3">
-          <Form.Label>Shadow Color</Form.Label>
-          <Form.Control
-            type="color"
-            value={/^#[0-9A-Fa-f]{6}$/.test(mergedStyles.boxShadowColor) ? mergedStyles.boxShadowColor : '#000000'}
-            onChange={(e) => updateStyle('boxShadowColor', e.target.value)}
-          />
-        </Form.Group>
+  
+        {colorKey && (
+          <Form.Group className="mb-3">
+            <OverlayTrigger
+              placement="top"
+              overlay={<Tooltip id={`${colorKey}-tooltip`}>Choose the color of the {title.toLowerCase()}.</Tooltip>}
+            >
+              <Form.Label>{title} Color</Form.Label>
+            </OverlayTrigger>
+            <Form.Control
+              type="color"
+              value={
+                /^#[0-9A-Fa-f]{6}$/.test(mergedStyles[colorKey])
+                  ? mergedStyles[colorKey]
+                  : '#000000'
+              }
+              onChange={(e) => updateStyle(colorKey, e.target.value)}
+            />
+          </Form.Group>
+        )}
+      </div>
+    );
+  
+    return (
+      <>
+        {renderShadowGroup('Box Shadow', boxShadowProps, 'boxShadowColor')}
+        {renderShadowGroup('Text Shadow', textShadowProps, 'textShadowColor')}
       </>
     );
-  };
+  };   
 
   // Render Background section
   const renderBackgroundOptions = () => (
@@ -431,6 +462,12 @@ const updateStyle = (keyOrNull, valueOrStyles) => {
     </>
   );
 
+  const renderShadowOptions = () => (
+    <>
+      {renderShadowEffects()}
+    </>
+  );
+
   return (
     <div className="vh-100" style={{ overflowY: 'auto', padding: '1rem' }}>
       <h5>Inspector</h5>
@@ -459,7 +496,7 @@ const updateStyle = (keyOrNull, valueOrStyles) => {
 
               <Accordion.Item eventKey="1">
                 <Accordion.Header>Shadow Effects</Accordion.Header>
-                <Accordion.Body>{renderShadowEffects()}</Accordion.Body>
+                <Accordion.Body>{renderShadowOptions()}</Accordion.Body>
               </Accordion.Item>
 
               <Accordion.Item eventKey="2">
