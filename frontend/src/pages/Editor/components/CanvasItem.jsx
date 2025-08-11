@@ -10,6 +10,27 @@ const normalizeUnitStyle = (styleObj, key, defaultValue = 100, defaultUnit = '%'
   }
 };
 
+function buildBoxShadow(styles) {
+  const {
+    boxShadowOffsetX = '0px',
+    boxShadowOffsetY = '0px',
+    boxShadowBlur = '0px',
+    boxShadowSpread = '0px',
+    boxShadowColor = '#000000',
+  } = styles;
+  return `${boxShadowOffsetX} ${boxShadowOffsetY} ${boxShadowBlur} ${boxShadowSpread} ${boxShadowColor}`;
+}
+
+function buildTextShadow(styles) {
+  const {
+    textShadowOffsetX = '0px',
+    textShadowOffsetY = '0px',
+    textShadowBlur = '0px',
+    textShadowColor = '#000000',
+  } = styles;
+  return `${textShadowOffsetX} ${textShadowOffsetY} ${textShadowBlur} ${textShadowColor}`;
+}
+
 const CanvasItem = ({
   component,
   index,
@@ -47,6 +68,11 @@ const CanvasItem = ({
     return acc;
   }, {});
   const styles = { ...globalStyles, ...deviceStyles };
+  const combinedStyles = {
+    ...styles,
+    boxShadow: buildBoxShadow(styles),
+    textShadow: buildTextShadow(styles),
+  };
 
   // Normalize unit styles
   normalizeUnitStyle(styles, 'width');
@@ -77,7 +103,7 @@ const CanvasItem = ({
         <img
           src={defaults.src}
           alt={defaults.alt || ''}
-          style={styles}
+          style={combinedStyles}
           draggable={false}
         />
       );
@@ -87,7 +113,7 @@ const CanvasItem = ({
     if (defaults.content) {
       return isSelected ? (
         <div
-          style={styles}
+          style={combinedStyles}
           contentEditable
           suppressContentEditableWarning
           onInput={handleContentChange}
@@ -97,7 +123,7 @@ const CanvasItem = ({
         />
       ) : (
         <div
-          style={styles}
+          style={combinedStyles}
           dangerouslySetInnerHTML={{ __html: defaults.content }}
           draggable={false}
         />
@@ -113,14 +139,14 @@ const CanvasItem = ({
         <Tag
           contentEditable
           suppressContentEditableWarning
-          style={styles}
+          style={combinedStyles}
           onInput={handleTextChange}
         >
           {text}
         </Tag>
       );
     }
-    return <Tag style={styles}>{text}</Tag>;
+    return <Tag style={combinedStyles}>{text}</Tag>;
   };
 
   return (
