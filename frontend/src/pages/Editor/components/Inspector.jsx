@@ -12,6 +12,8 @@ import {
   Accordion,
 } from 'react-bootstrap';
 import { BsTextLeft, BsTextCenter, BsTextRight } from 'react-icons/bs';
+// import DeepEditableHtml from './DeepEditableHtml';
+import RichTextEditor from './RichTextEditor';
 
 function getNestedValue(obj, path) {
   return path.split('.').reduce((acc, part) => acc?.[part], obj);
@@ -60,11 +62,6 @@ export default function Inspector({ component, onUpdate }) {
     const margin = getStyle(`styles.${type}`) || '';
     const marginLeft = getStyle(`styles.${type}Left`) || '';
     const marginRight = getStyle(`styles.${type}Right`) || '';
-  
-    console.log('Getting margin:', getStyle('styles.margin'));
-console.log('Getting padding:', getStyle('styles.padding'));
-console.log('margin:', margin, 'marginLeft:', marginLeft, 'marginRight:', marginRight);
-  
     const marginAuto =
       isMargin &&
       (
@@ -78,17 +75,15 @@ console.log('margin:', margin, 'marginLeft:', marginLeft, 'marginRight:', margin
         let updatedDefaults = { ...defaults };
       
         if (checked) {
-          // Remove shorthand margin, set marginLeft/right to 'auto' and preserve top/bottom margins or default to '0px'
           const marginTop = getStyle(`styles.${type}Top`) || '0px';
           const marginBottom = getStyle(`styles.${type}Bottom`) || '0px';
       
-          updatedDefaults = updateNestedValue(updatedDefaults, `styles.${type}`, ''); // Clear shorthand
+          updatedDefaults = updateNestedValue(updatedDefaults, `styles.${type}`, '');
           updatedDefaults = updateNestedValue(updatedDefaults, `styles.${type}Left`, 'auto');
           updatedDefaults = updateNestedValue(updatedDefaults, `styles.${type}Right`, 'auto');
           updatedDefaults = updateNestedValue(updatedDefaults, `styles.${type}Top`, marginTop);
           updatedDefaults = updateNestedValue(updatedDefaults, `styles.${type}Bottom`, marginBottom);
         } else {
-          // Clear shorthand margin, set all sides explicitly to '0px'
           updatedDefaults = updateNestedValue(updatedDefaults, `styles.${type}`, '');
           updatedDefaults = updateNestedValue(updatedDefaults, `styles.${type}Left`, '0px');
           updatedDefaults = updateNestedValue(updatedDefaults, `styles.${type}Right`, '0px');
@@ -241,6 +236,31 @@ console.log('margin:', margin, 'marginLeft:', marginLeft, 'marginRight:', margin
                       />
                     </Form.Group>
                   );
+
+                  case 'textarea':
+                    if (key === 'content') {
+                      return (
+                        <Form.Group key={key} className="mb-3">
+                          <Form.Label>{label}</Form.Label>
+                          <RichTextEditor
+                            initialHtml={currentValue || ''}
+                            onChange={(newHtml) => updateStyle(key, newHtml)}
+                          />
+                        </Form.Group>
+                      );                 
+                    }
+                    // fallback to normal textarea
+                    return (
+                      <Form.Group key={key} className="mb-3">
+                        <Form.Label>{label}</Form.Label>
+                        <Form.Control
+                          as="textarea"
+                          rows={6}
+                          value={currentValue}
+                          onChange={(e) => updateStyle(key, e.target.value)}
+                        />
+                      </Form.Group>
+                    );
 
                 case 'select':
                   return (

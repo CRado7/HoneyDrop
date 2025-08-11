@@ -56,46 +56,65 @@ const CanvasItem = ({
     isSelected ? 'bg-primary bg-opacity-10' : 'bg-white'
   }`;
 
-  const handleContentChange = (e) => {
+  // Handler for plain text content editing
+  const handleTextChange = (e) => {
     const updated = e.currentTarget.textContent;
     onUpdate(index, 'defaults.text', updated);
   };
 
-  // Render logic based on component type/data
+  // Handler for editable HTML content (cards)
+  const handleContentChange = (e) => {
+    const updatedHtml = e.currentTarget.innerHTML;
+    onUpdate(index, 'defaults.content', updatedHtml);
+  };
+
   const renderContent = () => {
     const defaults = component.defaults || {};
 
-    // Media element
+    // If it's an image element
     if (defaults.src) {
       return (
         <img
           src={defaults.src}
           alt={defaults.alt || ''}
           style={styles}
+          draggable={false}
         />
       );
     }
 
-    // Card with HTML content
+    // If it has raw HTML content (cards)
     if (defaults.content) {
-      return (
+      return isSelected ? (
+        <div
+          style={styles}
+          contentEditable
+          suppressContentEditableWarning
+          onInput={handleContentChange}
+          dangerouslySetInnerHTML={{ __html: defaults.content }}
+          onClick={(e) => e.stopPropagation()} // prevent click bubbling to parent div
+          className="editable-content"
+        />
+      ) : (
         <div
           style={styles}
           dangerouslySetInnerHTML={{ __html: defaults.content }}
+          draggable={false}
         />
       );
     }
 
-    // Heading/Text
+    // Otherwise, plain text element
     const Tag = defaults.tag || 'div';
     const text = defaults.text || 'Sample Text';
+
     if (isSelected && component.type !== 'section') {
       return (
         <Tag
           contentEditable
           suppressContentEditableWarning
           style={styles}
-          onInput={handleContentChange}
+          onInput={handleTextChange}
         >
           {text}
         </Tag>
@@ -105,17 +124,24 @@ const CanvasItem = ({
   };
 
   return (
-    <div ref={ref} className={className} onClick={() => onSelect('select', index)}>
+    <div
+      ref={ref}
+      className={className}
+      onClick={() => onSelect('select', index)}
+      style={{ cursor: isSelected ? 'text' : 'pointer' }}
+    >
       {/* Delete Button */}
-      <button
-        className="btn btn-sm btn-danger position-absolute top-0 end-0 m-1"
-        onClick={(e) => {
-          e.stopPropagation();
-          onDelete(index);
-        }}
-      >
-        ×
-      </button>
+      {isSelected && (
+        <button
+          className="btn btn-lg position-absolute top-0 end-0 m-0 text-black"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete(index);
+          }}
+        >
+          ×
+        </button>
+      )}
 
       {renderContent()}
     </div>
@@ -123,3 +149,4 @@ const CanvasItem = ({
 };
 
 export default CanvasItem;
+

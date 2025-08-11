@@ -22,7 +22,7 @@ const Sidebar = () => {
   return (
     <>
       {/* Sidebar */}
-      <div className={`sidebar ${dark ? 'bg-dark text-white' : 'bg-light text-dark'}`}>
+      <div className="sidebar bg-light text-dark">
         <Link to="/profile" className="profile">
           <img
             src="/default-avatar.png"
