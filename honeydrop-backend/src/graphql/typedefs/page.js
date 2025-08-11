@@ -1,6 +1,8 @@
 import gql from 'graphql-tag';
 
 const pageTypeDefs = gql`
+  scalar JSON
+
   type SEO {
     title: String
     description: String
@@ -15,6 +17,7 @@ const pageTypeDefs = gql`
     isHomepage: Boolean
     isPublished: Boolean
     seo: SEO
+    body: JSON
     sections: [Section!]!
     createdAt: String
     updatedAt: String
@@ -33,6 +36,7 @@ const pageTypeDefs = gql`
     isHomepage: Boolean
     isPublished: Boolean
     seo: SEOInput
+    body: JSON
     sections: [SectionInput]
   }
 
@@ -43,6 +47,7 @@ const pageTypeDefs = gql`
     isHomepage: Boolean
     isPublished: Boolean
     seo: SEOInput
+    body: JSON
     sections: [SectionInput]
   }
 
@@ -57,10 +62,7 @@ const pageTypeDefs = gql`
     deletePage(id: ID!): Boolean!
   }
 
-  #sections
-  scalar JSON
-
-    type SectionElement {
+  type SectionElement {
     id: ID!
     type: String!     # "heading", "paragraph", "image", "div", "component"
     tag: String       # For headings or divs (e.g., h1-h6, section, etc.)
@@ -68,20 +70,16 @@ const pageTypeDefs = gql`
     src: String       # For image/video
     alt: String
     styles: JSON
-    }
+  }
 
-    type Section {
+  type Section {
     id: ID!
     type: String!     # "hero", "gallery", "custom", etc.
     settings: JSON
     content: [SectionElement!]!
-    }
+  }
 
-    extend type Page {
-    sections: [Section!]!
-    }
-
-    input SectionElementInput {
+  input SectionElementInput {
     id: ID
     type: String!
     tag: String
@@ -89,14 +87,14 @@ const pageTypeDefs = gql`
     src: String
     alt: String
     styles: JSON
-    }
+  }
 
-    input SectionInput {
+  input SectionInput {
     id: ID
     type: String!
     settings: JSON
     content: [SectionElementInput!]!
-    }
+  }
 `;
 
 export default pageTypeDefs;

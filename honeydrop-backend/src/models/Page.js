@@ -16,6 +16,21 @@ const pageSchema = new mongoose.Schema(
       title: String,
       description: String,
     },
+    body: {
+      styles: {
+        type: Object,
+        default: {
+          paddingTop: '0px',
+          paddingRight: '0px',
+          paddingBottom: '0px',
+          paddingLeft: '0px',
+          backgroundColor: '#ffffff',
+          display: 'block', // or 'flex'
+          justifyContent: 'flex-start',
+          alignItems: 'flex-start',
+        },
+      },
+    },
     sections: {
       type: Array,
       default: [],

@@ -11,7 +11,7 @@ const systemFonts = [
     '"Trebuchet MS", sans-serif',
     'Impact, sans-serif',
     '"Palatino Linotype", serif',
-    '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
+    '"Segoe UI", sans-serif',
     '"Arial Black", sans-serif',
     '"Lucida Sans Unicode", sans-serif',
     '"Franklin Gothic Medium", sans-serif',
