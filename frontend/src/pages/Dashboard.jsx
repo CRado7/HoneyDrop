@@ -73,7 +73,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="p-5 ">
+    <div className="p-5">
       <Sidebar />
       <div className="mb-4 d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
         <div>

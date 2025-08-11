@@ -78,6 +78,11 @@ const baseStyles = {
       type: 'color',
       config: { defaultValue: 'rgba(0,0,0,0.05)' },
     },
+    {
+        key: 'content',
+        label: 'Content (HTML)',
+        type: 'textarea',
+    },
   ];
   
   const cards = [

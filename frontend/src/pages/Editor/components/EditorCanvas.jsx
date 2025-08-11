@@ -39,27 +39,28 @@ export default function EditorCanvas() {
       setElements(updated);
     }
   };
-
   const handleUpdate = ({ key, value, index }) => {
+    if (!key) return; // guard against empty/undefined key
+  
     setElements((prev) =>
       prev.map((comp, i) => {
         if (i !== index) return comp;
-
+  
         const updated = { ...comp };
         const keys = key.split('.');
         let obj = updated;
-
+  
         for (let j = 0; j < keys.length - 1; j++) {
           if (!obj[keys[j]]) obj[keys[j]] = {};
           obj = obj[keys[j]];
         }
-
+  
         obj[keys[keys.length - 1]] = value;
-
+  
         return updated;
       })
     );
-  };
+  };  
 
   const handleDelete = (index) => {
     const updated = [...elements];
@@ -72,7 +73,7 @@ export default function EditorCanvas() {
     <div className="container-fluid">
       <div className="row vh-100">
         {/* Sidebar */}
-        <div className="col-2 bg-light p-3 border-end">
+        <div className="col-2 bg-light p-3" style={{ overflowY: 'scroll' }}>
           <h5>Components</h5>
           <ComponentLibraryPanel
             onAddComponent={(component) => {
@@ -125,7 +126,7 @@ export default function EditorCanvas() {
         </div>
 
         {/* Inspector */}
-        <div className="col-3 bg-light p-3 border-start">
+        <div className="col-3 bg-light p-3 border-start text-black">
           <Inspector
             devicePreview={devicePreview}
             setDevicePreview={setDevicePreview}
