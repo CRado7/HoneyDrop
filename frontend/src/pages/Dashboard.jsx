@@ -34,7 +34,7 @@ export default function Dashboard() {
       const slug = site.name.toLowerCase().replace(/\s+/g, '-');
   
       if (site?.id) {
-        navigate(`/editor/${user.id}/${slug}`);
+        navigate(`/website/${site.id}`);
       }
   
       setShowCreateModal(false);
@@ -91,9 +91,9 @@ export default function Dashboard() {
               <Card className="h-100 shadow-sm position-relative">
                 <div
                   role="button"
-                  onClick={() => navigate(`/editor/${user.id}/${slug}`)}
+                  onClick={() => navigate(`/website/${site.id}`)}
                   onKeyDown={(e) =>
-                    e.key === 'Enter' && navigate(`/editor/${user.id}/${slug}`)
+                    e.key === 'Enter' && navigate(`/website/${site.id}`)
                   }
                   tabIndex={0}
                   className="text-decoration-none text-dark position-relative h-100"
