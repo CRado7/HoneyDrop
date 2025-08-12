@@ -20,9 +20,9 @@ const MONGO_URI = process.env.MONGO_URI;
     width: '400px',
     height: 'auto',
     color: '#000000',
-    marginTop: '0px',
+    marginTop: '16px',
     marginRight: 'auto',
-    marginBottom: '0px',
+    marginBottom: '16px',
     marginLeft: 'auto',
     fontFamily: 'Arial, sans-serif',
   };

@@ -13,7 +13,7 @@ const baseDefaults = {
   fontFamily: 'Arial, sans-serif',
   lineHeight: '1.6',
   letterSpacing: '0px',
-  marginTop: '0px',
+  marginTop: '16px',
   marginRight: '0px',
   marginBottom: '16px',
   marginLeft: '0px',

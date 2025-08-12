@@ -78,7 +78,7 @@ const CanvasItem = ({
   normalizeUnitStyle(styles, 'width');
   normalizeUnitStyle(styles, 'height', 'auto', '');
 
-  const className = `position-relative p-3 border mb-2 ${
+  const className = `position-relative border ${
     isSelected ? 'bg-primary bg-opacity-10' : 'bg-white'
   }`;
 
@@ -96,9 +96,53 @@ const CanvasItem = ({
 
   const renderContent = () => {
     const defaults = component.defaults || {};
+    const src = defaults.src?.trim();
+    const tag = defaults.tag || component.type || '';
 
-    // If it's an image element
-    if (defaults.src) {
+    const placeholderUrl = 'https://via.placeholder.com/600x400';
+    const isPlaceholderOrEmpty = !src || src === '' || src === placeholderUrl;
+
+    // Only show plus button if this is an image component or img tag with empty src
+    if ((component.type === 'image' || tag === 'img') && isPlaceholderOrEmpty) {
+      return (
+        <div
+          style={{
+            ...combinedStyles,
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: '#f8f9fa', // light gray
+            border: '1px dashed #6c757d',
+            cursor: 'pointer',
+            position: 'relative',
+            userSelect: 'none',
+            minHeight: combinedStyles.height || '150px',
+            width: combinedStyles.width || '100%',
+          }}
+          onClick={(e) => {
+            e.stopPropagation();
+            onSelect('edit', index); // open image uploader or editor
+          }}
+          title="Add image"
+          aria-label="Add image"
+        >
+          <button
+            type="button"
+            className="btn btn-outline-primary"
+            style={{ fontSize: '2rem', fontWeight: 'bold', lineHeight: 1 }}
+            onClick={(e) => {
+              e.stopPropagation();
+              onSelect('edit', index);
+            }}
+          >
+            +
+          </button>
+        </div>
+      );
+    }
+
+    // If it's an image with a valid src
+    if ((component.type === 'image' || tag === 'img') && src && !isPlaceholderOrEmpty) {
       return (
         <img
           src={defaults.src}
@@ -118,7 +162,7 @@ const CanvasItem = ({
           suppressContentEditableWarning
           onInput={handleContentChange}
           dangerouslySetInnerHTML={{ __html: defaults.content }}
-          onClick={(e) => e.stopPropagation()} // prevent click bubbling to parent div
+          onClick={(e) => e.stopPropagation()}
           className="editable-content"
         />
       ) : (
@@ -131,7 +175,7 @@ const CanvasItem = ({
     }
 
     // Otherwise, plain text element
-    const Tag = defaults.tag || 'div';
+    const Tag = tag || 'div';
     const text = defaults.text || 'Sample Text';
 
     if (isSelected && component.type !== 'section') {
@@ -152,22 +196,32 @@ const CanvasItem = ({
   return (
     <div
       ref={ref}
-      className={className}
+      className={isSelected ? className : undefined}
       onClick={() => onSelect('select', index)}
-      style={{ cursor: isSelected ? 'text' : 'pointer' }}
+      style={{
+        cursor: isSelected ? 'text' : 'pointer',
+      }}
     >
-      {/* Delete Button */}
       {isSelected && (
         <button
-          className="btn btn-lg position-absolute top-0 end-0 m-0 text-black"
+          className="btn btn-sm position-absolute top-0 end-0 m-0 text-black"
           onClick={(e) => {
             e.stopPropagation();
             onDelete(index);
           }}
         >
-          ×
+          Close
         </button>
       )}
+      <button
+        className="btn btn-sm position-absolute top-0 start-0 m-0 text-black"
+        onClick={(e) => {
+          e.stopPropagation();
+          onSelect('edit', index);
+        }}
+      >
+        Save
+      </button>
 
       {renderContent()}
     </div>
@@ -175,4 +229,3 @@ const CanvasItem = ({
 };
 
 export default CanvasItem;
-

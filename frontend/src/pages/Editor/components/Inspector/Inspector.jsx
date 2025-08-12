@@ -8,6 +8,7 @@ import RichTextEditor from './InspectorSections/RichTextEditor';
 import ShadowEffects from './InspectorSections/ShadowEffects';
 import BorderOptions from './InspectorSections/BorderOptions';
 import BackgroundOptions from './InspectorSections/BackgroundOptions';
+import ImageOptions from './InspectorSections/ImageOptions';
 
 const GLOBAL_DEFAULT_STYLES = {
   fontSize: '16px',
@@ -68,7 +69,7 @@ function updateNestedValue(obj, path, value) {
 
 const DEVICE_TYPES = ['desktop', 'tablet', 'mobile'];
 
-export default function Inspector({ component, onUpdate, bodyStyles, onUpdateBodyStyles }) {
+export default function Inspector({ component, onUpdate, bodyStyles, onUpdateBodyStyles, selectedItem = {} }) {
   const [selectedDevice, setSelectedDevice] = useState('desktop');
 
   if (!component) return <p>Select an element to edit its content</p>;
@@ -136,7 +137,7 @@ export default function Inspector({ component, onUpdate, bodyStyles, onUpdateBod
               <Accordion.Header>Content Editor</Accordion.Header>
               <Accordion.Body>
                 <TextOptions mergedStyles={mergedStyles} updateStyle={updateStyle} parseValueUnit={parseValueUnit} />
-                <RichTextEditor initialHtml={content} onChange={updateContent} />
+                <RichTextEditor initialHtml={content} onChange={updateContent} imageSrc={selectedItem.imageUrl} />
               </Accordion.Body>
             </Accordion.Item>
 
@@ -182,6 +183,13 @@ export default function Inspector({ component, onUpdate, bodyStyles, onUpdateBod
               <Accordion.Header>Background</Accordion.Header>
               <Accordion.Body>
                 <BackgroundOptions mergedStyles={mergedStyles} updateStyle={updateStyle} />
+              </Accordion.Body>
+            </Accordion.Item>
+
+            <Accordion.Item eventKey="image">
+              <Accordion.Header>Image Options</Accordion.Header>
+              <Accordion.Body>
+                <ImageOptions component={component} mergedStyles={mergedStyles} updateStyle={updateStyle} />
               </Accordion.Body>
             </Accordion.Item>
 

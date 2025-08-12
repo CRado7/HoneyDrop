@@ -1,15 +1,13 @@
-// src/components/ComponentLibraryPanel.js
 import React from 'react';
 import { Accordion, Button, Spinner } from 'react-bootstrap';
 import { useComponentLibrary } from '../../../hooks/useComponents';
 import { useDrag } from 'react-dnd';
 
-
 function DraggableComponent({ component, onAddComponent }) {
   const [, drag] = useDrag(() => ({
     type: 'component',
     item: {
-      defaults: { ...component.defaults }, 
+      defaults: { ...component.defaults },
       tag: component.tag,
       label: component.label,
       type: component.type,
@@ -41,7 +39,7 @@ export default function ComponentLibraryPanel({ onAddComponent }) {
   if (loading) return <Spinner animation="border" />;
   if (error) return <p>Error loading components</p>;
 
-  // 🧠 Group components by category
+  // Group components by category
   const componentsByCategory = data.getComponentLibrary.reduce((acc, component) => {
     const { category } = component;
     if (!acc[category]) acc[category] = [];
@@ -52,12 +50,15 @@ export default function ComponentLibraryPanel({ onAddComponent }) {
   return (
     <Accordion alwaysOpen>
       {Object.entries(componentsByCategory).map(([category, components], idx) => (
-        <Accordion.Item eventKey={idx.toString()} key={category}>
+        <Accordion.Item
+          eventKey={idx.toString()}
+          key={`${category}-${idx}`} // ✅ Safe even if categories repeat
+        >
           <Accordion.Header>{category}</Accordion.Header>
           <Accordion.Body>
-            {components.map((component) => (
+            {components.map((component, index) => (
               <DraggableComponent
-                key={component._id}
+                key={component._id || `${category}-${index}`} // ✅ Always unique
                 component={component}
                 onAddComponent={onAddComponent}
               />

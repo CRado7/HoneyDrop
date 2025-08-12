@@ -31,7 +31,7 @@ const seedHeadings = async () => {
             fontWeight: 'bold',
             color: '#000000',
             fontFamily: 'Arial, sans-serif',
-            marginTop: '0px',
+            marginTop: '16px',
             marginRight: '0px',
             marginBottom: '16px',
             marginLeft: '0px',

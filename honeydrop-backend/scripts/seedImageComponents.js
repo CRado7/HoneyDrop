@@ -12,6 +12,11 @@ const baseImageStyles = {
   borderRadius: '0px',
   objectFit: 'cover',
   aspectRatio: '16/9', // default
+  marginTop: '16px',
+  marginRight: 'auto',
+  marginBottom: '16px',
+  marginLeft: 'auto',
+  width: '400px',
 };
 
 const inspectorFields = [
