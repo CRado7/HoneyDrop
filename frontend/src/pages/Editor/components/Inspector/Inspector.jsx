@@ -8,6 +8,7 @@ import RichTextEditor from './InspectorSections/RichTextEditor';
 import ShadowEffects from './InspectorSections/ShadowEffects';
 import BorderOptions from './InspectorSections/BorderOptions';
 import BackgroundOptions from './InspectorSections/BackgroundOptions';
+import LayoutOptions from './InspectorSections/LayoutOptions';
 import ImageOptions from './InspectorSections/ImageOptions';
 
 const GLOBAL_DEFAULT_STYLES = {
@@ -148,22 +149,28 @@ export default function Inspector({ component, onUpdate, bodyStyles, onUpdateBod
               </Accordion.Body>
             </Accordion.Item>
 
+            <Accordion.Item eventKey="layout">
+              <Accordion.Header>Layout Options</Accordion.Header>
+              <Accordion.Body>
+                <LayoutOptions mergedStyles={mergedStyles} updateStyle={updateStyle} />
+              </Accordion.Body>
+            </Accordion.Item>
 
-              <Accordion.Item eventKey="2">
-                <Accordion.Header>Margin & Padding</Accordion.Header>
-                <Accordion.Body>
-                  <MarginPaddingControls
-                    type="margin"
-                    mergedStyles={mergedStyles}
-                    updateStyle={updateStyle}
-                  />
-                  <MarginPaddingControls
-                    type="padding"
-                    mergedStyles={mergedStyles}
-                    updateStyle={updateStyle}
-                  />
-                </Accordion.Body>
-              </Accordion.Item>
+            <Accordion.Item eventKey="2">
+              <Accordion.Header>Margin & Padding</Accordion.Header>
+              <Accordion.Body>
+                <MarginPaddingControls
+                  type="margin"
+                  mergedStyles={mergedStyles}
+                  updateStyle={updateStyle}
+                />
+                <MarginPaddingControls
+                  type="padding"
+                  mergedStyles={mergedStyles}
+                  updateStyle={updateStyle}
+                />
+              </Accordion.Body>
+            </Accordion.Item>
 
             <Accordion.Item eventKey="shadow">
               <Accordion.Header>Shadow Effects</Accordion.Header>
