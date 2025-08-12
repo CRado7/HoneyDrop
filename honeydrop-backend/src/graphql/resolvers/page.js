@@ -35,18 +35,26 @@ const pageResolvers = {
     },
   },
   Mutation: {
-    createPage: async (_, { input }, { user }) => {
-      const site = await Website.findById(input.site);
-      if (!site || String(site.user) !== String(user.id)) throw new Error('Unauthorized');
+    createWebsite: async (_, { input }, { user }) => {
+      const website = new Website({ ...input, user: user.id });
+      await website.save();
     
-      // Initialize body with defaults if not provided
+      // Create homepage with default body
       const pageData = {
-        ...input,
-        body: input.body ? input.body : DEFAULT_BODY,
+        site: website._id,
+        title: "Home",
+        slug: "home",
+        path: "/",
+        isHomepage: true,
+        isPublished: true,
+        body: DEFAULT_BODY,
       };
     
-      const page = new Page(pageData);
-      return await page.save();
+      // Use your existing createPage logic or create Page directly
+      const homepage = new Page(pageData);
+      await homepage.save();
+    
+      return website;
     },
     updatePage: async (_, { id, input }, { user }) => {
       const page = await Page.findById(id).populate('site');
@@ -68,10 +76,10 @@ const pageResolvers = {
     deletePage: async (_, { id }, { user }) => {
       const page = await Page.findById(id).populate('site');
       if (!page || String(page.site.user) !== String(user.id)) throw new Error('Unauthorized');
-
-      await page.remove();
+    
+      await Page.findByIdAndDelete(id);
       return true;
-    },
+    },    
   },
 };
 
