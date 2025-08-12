@@ -4,12 +4,13 @@ import BodyStyles from './InspectorSections/bodyStyles';
 import MarginPaddingControls from './InspectorSections/MarginPaddingControls';
 import SizeControl from './InspectorSections/SizeControl';
 import TextOptions from './InspectorSections/TextOptions';
-import RichTextEditor from './InspectorSections/RichTextEditor';
+import MultiBlockEditor from './InspectorSections/MultiBlockEditor';
 import ShadowEffects from './InspectorSections/ShadowEffects';
 import BorderOptions from './InspectorSections/BorderOptions';
 import BackgroundOptions from './InspectorSections/BackgroundOptions';
 import LayoutOptions from './InspectorSections/LayoutOptions';
 import ImageOptions from './InspectorSections/ImageOptions';
+import PositionOptions from './InspectorSections/PositionOptions';
 
 const GLOBAL_DEFAULT_STYLES = {
   fontSize: '16px',
@@ -133,14 +134,21 @@ export default function Inspector({ component, onUpdate, bodyStyles, onUpdateBod
               </Accordion.Body>
             </Accordion.Item>
 
-
             <Accordion.Item eventKey="text">
               <Accordion.Header>Content Editor</Accordion.Header>
-              <Accordion.Body>
-                <TextOptions mergedStyles={mergedStyles} updateStyle={updateStyle} parseValueUnit={parseValueUnit} />
-                <RichTextEditor initialHtml={content} onChange={updateContent} imageSrc={selectedItem.imageUrl} />
-              </Accordion.Body>
-            </Accordion.Item>
+                <Accordion.Body>
+                  <TextOptions 
+                    mergedStyles={mergedStyles} 
+                    updateStyle={updateStyle} 
+                    parseValueUnit={parseValueUnit} 
+                  />
+                  <MultiBlockEditor 
+                    initialHtml={content} 
+                    onChange={updateContent} 
+                    defaultStyles={mergedStyles} 
+                  />
+                </Accordion.Body>
+              </Accordion.Item>
 
             <Accordion.Item eventKey="size">
               <Accordion.Header>Size</Accordion.Header>
@@ -166,6 +174,16 @@ export default function Inspector({ component, onUpdate, bodyStyles, onUpdateBod
                 />
                 <MarginPaddingControls
                   type="padding"
+                  mergedStyles={mergedStyles}
+                  updateStyle={updateStyle}
+                />
+              </Accordion.Body>
+            </Accordion.Item>
+
+            <Accordion.Item eventKey="position">
+              <Accordion.Header>Position</Accordion.Header>
+              <Accordion.Body>
+                <PositionOptions
                   mergedStyles={mergedStyles}
                   updateStyle={updateStyle}
                 />
