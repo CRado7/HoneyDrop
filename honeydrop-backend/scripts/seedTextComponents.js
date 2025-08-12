@@ -1,7 +1,6 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import ComponentLibrary from '../src/models/ComponentLibrary.js';
-import systemFonts from '../src/data/systemFonts.js';
 
 dotenv.config();
 
@@ -14,7 +13,7 @@ const baseDefaults = {
   fontFamily: 'Arial, sans-serif',
   lineHeight: '1.6',
   letterSpacing: '0px',
-  marginTop: '0px',
+  marginTop: '16px',
   marginRight: '0px',
   marginBottom: '16px',
   marginLeft: '0px',

@@ -20,7 +20,7 @@ const MENU_ITEMS = [
   { action: 'setFontSize', label: 'Font Size', options: ['12px', '14px', '16px', '18px', '24px', '32px'] },
 ];
 
-export default function RichTextEditor({ initialHtml = '', onChange }) {
+export default function RichTextEditor({ initialHtml = '', onChange, imageSrc }) {
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -38,11 +38,10 @@ export default function RichTextEditor({ initialHtml = '', onChange }) {
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [color, setColor] = useState('black');
 
-  // Reset editor content when initialHtml changes (and editor is ready)
   useEffect(() => {
     if (editor && initialHtml !== editor.getHTML()) {
-      editor.commands.setContent(initialHtml, false); // false = do not trigger onUpdate
-      setColor('black'); // reset color picker state if you want
+      editor.commands.setContent(initialHtml, false);
+      setColor('black');
     }
   }, [initialHtml, editor]);
 
@@ -52,7 +51,6 @@ export default function RichTextEditor({ initialHtml = '', onChange }) {
 
   const setFontSize = (size) => editor.chain().focus().setFontSize(size).run();
   const setFontFamily = (family) => editor.chain().focus().setFontFamily(family).run();
-
   const applyColor = (newColor) => {
     setColor(newColor.hex);
     editor.chain().focus().setColor(newColor.hex).run();
@@ -77,16 +75,22 @@ export default function RichTextEditor({ initialHtml = '', onChange }) {
 
   return (
     <div>
+      {/* If an image exists, show it */}
+      {imageSrc && (
+        <div style={{ marginBottom: 10 }}>
+          <img
+            src={imageSrc || '/placeholder.png'}
+            alt="Selected item"
+            style={{ maxWidth: '100%', height: 'auto', borderRadius: 4 }}
+          />
+        </div>
+      )}
+
       <ButtonGroup className="mb-2" aria-label="Basic formatting">
         {renderButton('toggleBold', BsTypeBold, 'Bold')}
         {renderButton('toggleItalic', BsTypeItalic, 'Italic')}
         {renderButton('toggleUnderline', BsTypeUnderline, 'Underline')}
-
-        {/* Color Picker Toggle Button */}
-        <OverlayTrigger
-          placement="top"
-          overlay={<Tooltip id="tooltip-colorpicker">Text Color</Tooltip>}
-        >
+        <OverlayTrigger placement="top" overlay={<Tooltip id="tooltip-colorpicker">Text Color</Tooltip>}>
           <Button
             variant={showColorPicker ? 'primary' : 'outline-primary'}
             onClick={() => setShowColorPicker(!showColorPicker)}
@@ -136,7 +140,6 @@ export default function RichTextEditor({ initialHtml = '', onChange }) {
           <option key={family} value={family}>{family}</option>
         ))}
       </Form.Select>
-
 
       <EditorContent
         editor={editor}

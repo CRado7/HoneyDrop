@@ -6,7 +6,10 @@ dotenv.config();
 const MONGO_URI = process.env.MONGO_URI;
 
   const baseStyles = {
-    padding: '16px',
+    paddingTop: '16px',
+    paddingRight: '16px',
+    paddingBottom: '16px',
+    paddingLeft: '16px',
     backgroundColor: '#ffffff',
     borderRadius: '8px',
     boxShadowOffsetX: '0px',
@@ -17,7 +20,10 @@ const MONGO_URI = process.env.MONGO_URI;
     width: '400px',
     height: 'auto',
     color: '#000000',
-    margin: '0 auto',
+    marginTop: '16px',
+    marginRight: 'auto',
+    marginBottom: '16px',
+    marginLeft: 'auto',
     fontFamily: 'Arial, sans-serif',
   };
   

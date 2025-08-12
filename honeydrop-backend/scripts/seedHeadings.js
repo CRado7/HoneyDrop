@@ -1,7 +1,6 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import ComponentLibrary from '../src/models/ComponentLibrary.js';
-import systemFonts from '../src/data/systemFonts.js';
 
 dotenv.config();
 
@@ -32,7 +31,7 @@ const seedHeadings = async () => {
             fontWeight: 'bold',
             color: '#000000',
             fontFamily: 'Arial, sans-serif',
-            marginTop: '0px',
+            marginTop: '16px',
             marginRight: '0px',
             marginBottom: '16px',
             marginLeft: '0px',
