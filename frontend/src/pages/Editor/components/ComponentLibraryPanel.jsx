@@ -58,7 +58,9 @@ export default function ComponentLibraryPanel({ onAddComponent }) {
           <Accordion.Body>
             {components.map((component, index) => (
               <DraggableComponent
+
                 key={component._id || `${category}-${index}`} // ✅ Always unique
+
                 component={component}
                 onAddComponent={onAddComponent}
               />
