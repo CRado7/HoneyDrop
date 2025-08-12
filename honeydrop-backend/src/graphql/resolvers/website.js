@@ -1,5 +1,25 @@
 import Website from '../../models/Website.js';
 import User from '../../models/user.js';
+import Page from '../../models/Page.js';
+
+const DEFAULT_BODY = {
+  styles: {
+    paddingTop: '0px',
+    paddingRight: '15px',
+    paddingBottom: '0px',
+    paddingLeft: '15px',
+    backgroundColor: '#ffffff',
+    display: 'flex',
+    flexDirection: 'column',
+    // add any other default body styles you want
+  },
+  layout: {
+    // example layout defaults if you want
+    type: 'flex',
+    justifyContent: 'flex-start',
+    alignItems: 'stretch',
+  }
+};
 
 
 const websiteResolvers = {
@@ -41,8 +61,21 @@ const websiteResolvers = {
         { new: true }
       );
     
+      // Create default homepage for this website
+      const homepage = new Page({
+        site: savedWebsite._id,
+        title: 'Home',
+        slug: 'home',
+        path: '/',
+        isHomepage: true,
+        isPublished: false,
+        body: DEFAULT_BODY, // <-- define this as your default page body content
+      });
+    
+      await homepage.save();
+    
       return savedWebsite;
-    },       
+    },           
     deleteWebsite: async (_, { id }, { user }) => {
       const website = await Website.findById(id);
       if (!website) throw new Error('Website not found');

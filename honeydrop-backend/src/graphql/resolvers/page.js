@@ -35,26 +35,18 @@ const pageResolvers = {
     },
   },
   Mutation: {
-    createWebsite: async (_, { input }, { user }) => {
-      const website = new Website({ ...input, user: user.id });
-      await website.save();
+    createPage: async (_, { input }, { user }) => {
+      const site = await Website.findById(input.site);
+      if (!site || String(site.user) !== String(user.id)) throw new Error('Unauthorized');
     
-      // Create homepage with default body
+      // Initialize body with defaults if not provided
       const pageData = {
-        site: website._id,
-        title: "Home",
-        slug: "home",
-        path: "/",
-        isHomepage: true,
-        isPublished: true,
-        body: DEFAULT_BODY,
+        ...input,
+        body: input.body ? input.body : DEFAULT_BODY,
       };
     
-      // Use your existing createPage logic or create Page directly
-      const homepage = new Page(pageData);
-      await homepage.save();
-    
-      return website;
+      const page = new Page(pageData);
+      return await page.save();
     },
     updatePage: async (_, { id, input }, { user }) => {
       const page = await Page.findById(id).populate('site');
