@@ -89,7 +89,7 @@ export default function EditorCanvas() {
               setElements((prev) => [
                 ...prev,
                 {
-                  ...component.defaults,
+                  defaults: { ...component.defaults },  // keep defaults nested
                   type: component.type,
                   label: component.label,
                   tag: component.defaults?.tag || 'div',

@@ -1,7 +1,6 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import ComponentLibrary from '../src/models/ComponentLibrary.js';
-import systemFonts from '../src/data/systemFonts.js';
 
 dotenv.config();
 
