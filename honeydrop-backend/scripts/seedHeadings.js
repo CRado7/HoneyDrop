@@ -1,56 +1,52 @@
-import mongoose from 'mongoose';
-import dotenv from 'dotenv';
+// seedHeadings.js
+import { v4 as uuidv4 } from 'uuid';
 import ComponentLibrary from '../src/models/ComponentLibrary.js';
 
-dotenv.config();
-
-const MONGO_URI = process.env.MONGO_URI;
-
-const seedHeadings = async () => {
-  try {
-    await mongoose.connect(MONGO_URI);
-    console.log('Connected to MongoDB');
-
-    // Clear existing heading components
-    await ComponentLibrary.deleteMany({ category: 'Headings' });
-
-    const headingComponents = Array.from({ length: 6 }, (_, i) => {
-      const level = i + 1;
-      const tag = `h${level}`;
-      const content = `<${tag}>Heading ${level}</${tag}>`;
-
-      return {
-        category: 'Headings',
-        type: `heading-${level}`,
-        label: `Heading ${level}`,
-        defaults: {
-          content,  // universal content field with HTML string
-          tag,
-          styles: {
-            fontSize: `${36 - level * 4}px`,
-            fontWeight: 'bold',
-            color: '#000000',
-            fontFamily: 'Arial, sans-serif',
-            marginTop: '16px',
-            marginRight: '0px',
-            marginBottom: '16px',
-            marginLeft: '0px',
-            paddingTop: '0px',
-            paddingRight: '0px',
-            paddingBottom: '0px',
-            paddingLeft: '0px',
-          },
-        },
-      };
-    });
-
-    await ComponentLibrary.insertMany(headingComponents);
-    console.log('✅ Heading components seeded successfully');
-    process.exit(0);
-  } catch (error) {
-    console.error('❌ Error seeding heading components:', error);
-    process.exit(1);
-  }
+const baseStyles = {
+  fontWeight: 'bold',
+  color: '#000000',
+  fontFamily: 'Arial, sans-serif',
+  marginTop: '16px',
+  marginRight: '0px',
+  marginBottom: '16px',
+  marginLeft: '0px',
+  paddingTop: '0px',
+  paddingRight: '0px',
+  paddingBottom: '0px',
+  paddingLeft: '0px',
 };
 
-seedHeadings();
+export const seedHeadings = async () => {
+  // Clear existing heading components
+  await ComponentLibrary.deleteMany({ category: 'Headings' });
+
+  const headingComponents = Array.from({ length: 6 }, (_, i) => {
+    const level = i + 1;
+    const tag = `h${level}`;
+
+    return {
+      category: 'Headings',
+      type: `heading-${level}`,
+      label: `Heading ${level}`,
+      defaults: {
+        tag: 'div', // wrapper container for editable contentBlocks
+        styles: {}, // optional container styles
+        contentBlocks: [
+          {
+            id: uuidv4(),
+            type: 'heading',
+            tag,
+            innerHtml: `Heading ${level}`,
+            styles: {
+              ...baseStyles,
+              fontSize: `${36 - level * 4}px`, // decrease size with heading level
+            },
+          },
+        ],
+      },
+    };
+  });
+
+  await ComponentLibrary.insertMany(headingComponents);
+  console.log('✅ Heading components seeded successfully');
+};

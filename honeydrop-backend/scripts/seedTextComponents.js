@@ -1,12 +1,8 @@
-import mongoose from 'mongoose';
-import dotenv from 'dotenv';
+// seedTextComponents.js
+import { v4 as uuidv4 } from 'uuid';
 import ComponentLibrary from '../src/models/ComponentLibrary.js';
 
-dotenv.config();
-
-const MONGO_URI = process.env.MONGO_URI;
-
-const baseDefaults = {
+const baseStyles = {
   fontSize: '16px',
   fontWeight: 'normal',
   color: '#000000',
@@ -23,78 +19,99 @@ const baseDefaults = {
   paddingLeft: '0px',
 };
 
-const seedTextComponents = async () => {
-  try {
-    await mongoose.connect(MONGO_URI);
-    console.log('Connected to MongoDB');
+export const seedTextComponents = async () => {
+  // Clear existing text components
+  const typesToDelete = ['paragraph', 'span', 'blockquote', 'preformatted'];
+  await ComponentLibrary.deleteMany({ type: { $in: typesToDelete } });
 
-    // Remove any existing components for these types
-    const typesToDelete = ['paragraph', 'span', 'blockquote', 'preformatted'];
-    await ComponentLibrary.deleteMany({ type: { $in: typesToDelete } });
-
-    const components = [
-      {
-        category: 'Text',
-        type: 'paragraph',
-        label: 'Paragraph',
-        defaults: {
-          tag: 'p',
-          content: `<p>This is a paragraph. You can edit this text.</p>`,
-          styles: { ...baseDefaults },
-        },
-      },
-      {
-        category: 'Text',
-        type: 'span',
-        label: 'Span',
-        defaults: {
-          tag: 'span',
-          content: `<span>This is inline span text.</span>`,
-          styles: { ...baseDefaults },
-        },
-      },
-      {
-        category: 'Text',
-        type: 'blockquote',
-        label: 'Blockquote',
-        defaults: {
-          tag: 'blockquote',
-          content: `<blockquote>“This is a quote. Customize it as you like.”</blockquote>`,
-          styles: {
-            ...baseDefaults,
-            fontStyle: 'italic',
-            borderLeft: '4px solid #ccc',
-            paddingLeft: '16px',
+  const components = [
+    {
+      category: 'Text',
+      type: 'paragraph',
+      label: 'Paragraph',
+      defaults: {
+        tag: 'div',
+        styles: {},
+        contentBlocks: [
+          {
+            id: uuidv4(),
+            type: 'text',
+            tag: 'p',
+            innerHtml: 'This is a paragraph. You can edit this text.',
+            styles: { ...baseStyles },
           },
-        },
+        ],
       },
-      {
-        category: 'Text',
-        type: 'preformatted',
-        label: 'Preformatted',
-        defaults: {
-          tag: 'pre',
-          content: `<pre>Preformatted
+    },
+    {
+      category: 'Text',
+      type: 'span',
+      label: 'Span',
+      defaults: {
+        tag: 'div',
+        styles: {},
+        contentBlocks: [
+          {
+            id: uuidv4(),
+            type: 'text',
+            tag: 'span',
+            innerHtml: 'This is inline span text.',
+            styles: { ...baseStyles },
+          },
+        ],
+      },
+    },
+    {
+      category: 'Text',
+      type: 'blockquote',
+      label: 'Blockquote',
+      defaults: {
+        tag: 'div',
+        styles: {},
+        contentBlocks: [
+          {
+            id: uuidv4(),
+            type: 'text',
+            tag: 'blockquote',
+            innerHtml: '“This is a quote. Customize it as you like.”',
+            styles: {
+              ...baseStyles,
+              fontStyle: 'italic',
+              borderLeft: '4px solid #ccc',
+              paddingLeft: '16px',
+            },
+          },
+        ],
+      },
+    },
+    {
+      category: 'Text',
+      type: 'preformatted',
+      label: 'Preformatted',
+      defaults: {
+        tag: 'div',
+        styles: {},
+        contentBlocks: [
+          {
+            id: uuidv4(),
+            type: 'text',
+            tag: 'pre',
+            innerHtml: `Preformatted
   Indented
-    Spacing preserved.</pre>`,
-          styles: {
-            ...baseDefaults,
-            fontFamily: '"Courier New", monospace',
-            backgroundColor: '#f5f5f5',
-            padding: '16px',
-            overflowX: 'auto',
+    Spacing preserved.`,
+            styles: {
+              ...baseStyles,
+              fontFamily: '"Courier New", monospace',
+              backgroundColor: '#f5f5f5',
+              padding: '16px',
+              overflowX: 'auto',
+            },
           },
-        },
+        ],
       },
-    ];
+    },
+  ];
 
-    await ComponentLibrary.insertMany(components);
-    console.log('✅ Text components seeded successfully');
-    process.exit(0);
-  } catch (error) {
-    console.error('❌ Error seeding text components:', error);
-    process.exit(1);
-  }
+  await ComponentLibrary.insertMany(components);
+  console.log('✅ Text components seeded successfully');
 };
-
-seedTextComponents();

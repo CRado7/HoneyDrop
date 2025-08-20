@@ -1,11 +1,7 @@
-import mongoose from 'mongoose';
-import dotenv from 'dotenv';
 import ComponentLibrary from '../src/models/ComponentLibrary.js';
+import { v4 as uuidv4 } from 'uuid';
 
-dotenv.config();
-const MONGO_URI = process.env.MONGO_URI;
-
-const baseFormStyles = {
+const baseStyles = {
   paddingTop: '16px',
   paddingRight: '16px',
   paddingBottom: '16px',
@@ -17,6 +13,7 @@ const baseFormStyles = {
   boxShadowBlur: '8px',
   boxShadowSpread: '0px',
   boxShadowColor: '#0000000d',
+  boxShadow: '0px 2px 8px 0px #0000000d',
   width: '400px',
   color: '#000000',
   marginTop: '16px',
@@ -24,6 +21,8 @@ const baseFormStyles = {
   marginBottom: '16px',
   marginLeft: 'auto',
   fontFamily: 'Arial, sans-serif',
+  display: 'flex',
+  flexDirection: 'column',
 };
 
 const forms = [
@@ -33,13 +32,68 @@ const forms = [
     label: 'Contact Form',
     defaults: {
       tag: 'form',
-      styles: { ...baseFormStyles },
-      content: `
-        <label>Name:<br /><input type="text" name="name" style="width: 100%; padding: 8px; margin-top: 4px; margin-bottom: 12px; border-radius: 4px; border: 1px solid #ccc;" /></label>
-        <label>Email:<br /><input type="email" name="email" style="width: 100%; padding: 8px; margin-top: 4px; margin-bottom: 12px; border-radius: 4px; border: 1px solid #ccc;" /></label>
-        <label>Message:<br /><textarea name="message" rows="4" style="width: 100%; padding: 8px; margin-top: 4px; margin-bottom: 12px; border-radius: 4px; border: 1px solid #ccc;"></textarea></label>
-        <button type="submit" style="padding: 12px 24px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Send</button>
-      `,
+      styles: { ...baseStyles },
+      contentBlocks: [
+        {
+          id: uuidv4(),
+          type: 'label',
+          tag: 'label',
+          innerHtml: 'Name:',
+          styles: {},
+          contentBlocks: [
+            {
+              id: uuidv4(),
+              type: 'input',
+              tag: 'input',
+              inputType: 'text',
+              name: 'name',
+              styles: { width: '100%', padding: '8px', marginTop: '4px', marginBottom: '12px', borderRadius: '4px', border: '1px solid #ccc' },
+            },
+          ],
+        },
+        {
+          id: uuidv4(),
+          type: 'label',
+          tag: 'label',
+          innerHtml: 'Email:',
+          styles: {},
+          contentBlocks: [
+            {
+              id: uuidv4(),
+              type: 'input',
+              tag: 'input',
+              inputType: 'email',
+              name: 'email',
+              styles: { width: '100%', padding: '8px', marginTop: '4px', marginBottom: '12px', borderRadius: '4px', border: '1px solid #ccc' },
+            },
+          ],
+        },
+        {
+          id: uuidv4(),
+          type: 'label',
+          tag: 'label',
+          innerHtml: 'Message:',
+          styles: {},
+          contentBlocks: [
+            {
+              id: uuidv4(),
+              type: 'textarea',
+              tag: 'textarea',
+              name: 'message',
+              rows: 4,
+              styles: { width: '100%', padding: '8px', marginTop: '4px', marginBottom: '12px', borderRadius: '4px', border: '1px solid #ccc' },
+            },
+          ],
+        },
+        {
+          id: uuidv4(),
+          type: 'button',
+          tag: 'button',
+          innerHtml: 'Send',
+          buttonType: 'submit',
+          styles: { padding: '12px 24px', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' },
+        },
+      ],
     },
   },
   {
@@ -48,12 +102,51 @@ const forms = [
     label: 'Login Form',
     defaults: {
       tag: 'form',
-      styles: { ...baseFormStyles },
-      content: `
-        <label>Username:<br /><input type="text" name="username" style="width: 100%; padding: 8px; margin-top: 4px; margin-bottom: 12px; border-radius: 4px; border: 1px solid #ccc;" /></label>
-        <label>Password:<br /><input type="password" name="password" style="width: 100%; padding: 8px; margin-top: 4px; margin-bottom: 12px; border-radius: 4px; border: 1px solid #ccc;" /></label>
-        <button type="submit" style="padding: 12px 24px; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">Log In</button>
-      `,
+      styles: { ...baseStyles },
+      contentBlocks: [
+        {
+          id: uuidv4(),
+          type: 'label',
+          tag: 'label',
+          innerHtml: 'Username:',
+          styles: {},
+          contentBlocks: [
+            {
+              id: uuidv4(),
+              type: 'input',
+              tag: 'input',
+              inputType: 'text',
+              name: 'username',
+              styles: { width: '100%', padding: '8px', marginTop: '4px', marginBottom: '12px', borderRadius: '4px', border: '1px solid #ccc' },
+            },
+          ],
+        },
+        {
+          id: uuidv4(),
+          type: 'label',
+          tag: 'label',
+          innerHtml: 'Password:',
+          styles: {},
+          contentBlocks: [
+            {
+              id: uuidv4(),
+              type: 'input',
+              tag: 'input',
+              inputType: 'password',
+              name: 'password',
+              styles: { width: '100%', padding: '8px', marginTop: '4px', marginBottom: '12px', borderRadius: '4px', border: '1px solid #ccc' },
+            },
+          ],
+        },
+        {
+          id: uuidv4(),
+          type: 'button',
+          tag: 'button',
+          innerHtml: 'Log In',
+          buttonType: 'submit',
+          styles: { padding: '12px 24px', backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' },
+        },
+      ],
     },
   },
   {
@@ -62,11 +155,34 @@ const forms = [
     label: 'Newsletter Signup',
     defaults: {
       tag: 'form',
-      styles: { ...baseFormStyles },
-      content: `
-        <label>Email:<br /><input type="email" name="email" style="width: 70%; padding: 8px; border-radius: 4px; border: 1px solid #ccc;" />
-        <button type="submit" style="padding: 10px 16px; background-color: #17a2b8; color: white; border: none; border-radius: 4px; cursor: pointer;">Subscribe</button></label>
-      `,
+      styles: { ...baseStyles },
+      contentBlocks: [
+        {
+          id: uuidv4(),
+          type: 'label',
+          tag: 'label',
+          innerHtml: 'Email:',
+          styles: {},
+          contentBlocks: [
+            {
+              id: uuidv4(),
+              type: 'input',
+              tag: 'input',
+              inputType: 'email',
+              name: 'email',
+              styles: { width: '70%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc', flexDirection: 'row' },
+            },
+            {
+              id: uuidv4(),
+              type: 'button',
+              tag: 'button',
+              innerHtml: 'Subscribe',
+              buttonType: 'submit',
+              styles: { padding: '10px 16px', backgroundColor: '#17a2b8', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', marginLeft: '8px' },
+            },
+          ],
+        },
+      ],
     },
   },
   {
@@ -75,11 +191,26 @@ const forms = [
     label: 'Search Form',
     defaults: {
       tag: 'form',
-      styles: { ...baseFormStyles },
-      content: `
-        <input type="search" name="q" placeholder="Search..." style="width: 80%; padding: 8px; border-radius: 4px; border: 1px solid #ccc;" />
-        <button type="submit" style="padding: 10px 16px; background-color: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;">Go</button>
-      `,
+      styles: { ...baseStyles },
+      contentBlocks: [
+        {
+          id: uuidv4(),
+          type: 'input',
+          tag: 'input',
+          inputType: 'search',
+          name: 'q',
+          placeholder: 'Search...',
+          styles: { width: '80%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc', marginRight: '8px', flexDirection: 'row' },
+        },
+        {
+          id: uuidv4(),
+          type: 'button',
+          tag: 'button',
+          innerHtml: 'Go',
+          buttonType: 'submit',
+          styles: { padding: '10px 16px', backgroundColor: '#6c757d', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' },
+        },
+      ],
     },
   },
   {
@@ -88,29 +219,40 @@ const forms = [
     label: 'Feedback Form',
     defaults: {
       tag: 'form',
-      styles: { ...baseFormStyles },
-      content: `
-        <label>Feedback:<br /><textarea name="feedback" rows="5" style="width: 100%; padding: 8px; margin-top: 4px; border-radius: 4px; border: 1px solid #ccc;"></textarea></label>
-        <button type="submit" style="padding: 12px 24px; background-color: #ffc107; color: black; border: none; border-radius: 4px; cursor: pointer;">Submit</button>
-      `,
+      styles: { ...baseStyles },
+      contentBlocks: [
+        {
+          id: uuidv4(),
+          type: 'label',
+          tag: 'label',
+          innerHtml: 'Feedback:',
+          styles: {},
+          contentBlocks: [
+            {
+              id: uuidv4(),
+              type: 'textarea',
+              tag: 'textarea',
+              name: 'feedback',
+              rows: 5,
+              styles: { width: '100%', padding: '8px', marginTop: '4px', borderRadius: '4px', border: '1px solid #ccc' },
+            },
+          ],
+        },
+        {
+          id: uuidv4(),
+          type: 'button',
+          tag: 'button',
+          innerHtml: 'Submit',
+          buttonType: 'submit',
+          styles: { padding: '12px 24px', backgroundColor: '#ffc107', color: 'black', border: 'none', borderRadius: '4px', cursor: 'pointer' },
+        },
+      ],
     },
   },
 ];
 
-const seedForms = async () => {
-  try {
-    await mongoose.connect(MONGO_URI);
-    console.log('Connected to MongoDB');
-
-    await ComponentLibrary.deleteMany({ type: { $in: forms.map((f) => f.type) } });
-    await ComponentLibrary.insertMany(forms);
-
-    console.log('✅ Forms seeded successfully');
-    process.exit(0);
-  } catch (error) {
-    console.error('❌ Failed to seed forms:', error);
-    process.exit(1);
-  }
+export const seedForms = async () => {
+  await ComponentLibrary.deleteMany({ type: { $in: forms.map((f) => f.type) } });
+  await ComponentLibrary.insertMany(forms);
+  console.log('✅ Forms seeded successfully');
 };
-
-seedForms();

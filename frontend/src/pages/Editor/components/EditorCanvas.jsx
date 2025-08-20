@@ -1,4 +1,3 @@
-// src/components/EditorCanvas.js
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useDrop } from 'react-dnd';
@@ -11,71 +10,61 @@ import CanvasItem from './CanvasItem';
 
 export default function EditorCanvas() {
   const { siteName } = useParams();
-  const [elements, setElements] = useState([]);
-  const [selectedIndex, setSelectedIndex] = useState(null);
-  const [devicePreview, setDevicePreview] = useState('desktop');
-  const [bodyStyles, setBodyStyles] = useState({ /* initial body styles */ });
 
+  const [elements, setElements] = useState([]);
+  const [devicePreview, setDevicePreview] = useState('desktop');
+  const [bodyStyles, setBodyStyles] = useState({});
+  const [selectedBlock, setSelectedBlock] = useState(null);
+
+  // --- Body styles ---
   const handleUpdateBodyStyle = (key, value) => {
-    setBodyStyles(prev => ({
-      ...prev,
-      [key]: value,
-    }));
+    setBodyStyles(prev => ({ ...prev, [key]: value }));
   };
 
+  // --- Canvas drop ---
   const [, drop] = useDrop(() => ({
     accept: 'component',
     drop: (item) => {
       const newComponent = {
-        defaults: { ...item.defaults },  // wrap in defaults key
+        defaults: { ...item.defaults },
         type: item.type,
-        tag: item.tag || (item.defaults && item.defaults.tag) || 'div',
+        tag: item.tag || item.defaults?.tag || 'div',
         label: item.label,
         inspectorFields: item.inspectorFields || [],
       };
-      setElements((prev) => [...prev, newComponent]);
+      setElements(prev => [...prev, newComponent]);
     },
-  }));  
+  }));
 
-  const handleSelect = (action, fromIndex, toIndex) => {
-    if (action === 'select') {
-      setSelectedIndex(fromIndex);
-    } else if (action === 'reorder') {
-      const updated = [...elements];
-      const [moved] = updated.splice(fromIndex, 1);
-      updated.splice(toIndex, 0, moved);
-      setElements(updated);
+  // --- Component / Block select ---
+  const handleSelect = (blockInfo) => {
+    console.log('[EditorCanvas] selectedBlock updated:', blockInfo);
+    setSelectedBlock(blockInfo);
+  };
+
+  // --- Update nested block ---
+  const handleUpdateBlock = (parentIndex, updatedBlock) => {
+    setElements(prev => {
+      const updated = [...prev];
+      const blocks = updated[parentIndex].defaults.contentBlocks || [];
+      updated[parentIndex].defaults.contentBlocks = blocks.map(b =>
+        b.id === updatedBlock.id ? updatedBlock : b
+      );
+      return updated;
+    });
+    // Update selected block if it's the one being edited
+    if (selectedBlock?.id === updatedBlock.id) {
+      setSelectedBlock({ ...selectedBlock, block: updatedBlock });
     }
   };
-  
-  const handleUpdate = ({ key, value, index }) => {
-    if (!key) return; // guard against empty/undefined key
-  
-    setElements((prev) =>
-      prev.map((comp, i) => {
-        if (i !== index) return comp;
-  
-        const updated = { ...comp };
-        const keys = key.split('.');
-        let obj = updated;
-  
-        for (let j = 0; j < keys.length - 1; j++) {
-          if (!obj[keys[j]]) obj[keys[j]] = {};
-          obj = obj[keys[j]];
-        }
-  
-        obj[keys[keys.length - 1]] = value;
-  
-        return updated;
-      })
-    );
-  };  
 
+  // --- Delete element ---
   const handleDelete = (index) => {
-    const updated = [...elements];
-    updated.splice(index, 1);
-    setElements(updated);
-    if (selectedIndex === index) setSelectedIndex(null);
+    setElements(prev => prev.filter((_, i) => i !== index));
+
+    if (selectedBlock?.parentIndex === index) {
+      setSelectedBlock(null);
+    }
   };
 
   return (
@@ -86,10 +75,10 @@ export default function EditorCanvas() {
           <h5>Components</h5>
           <ComponentLibraryPanel
             onAddComponent={(component) => {
-              setElements((prev) => [
+              setElements(prev => [
                 ...prev,
                 {
-                  defaults: { ...component.defaults },  // keep defaults nested
+                  defaults: { ...component.defaults },
                   type: component.type,
                   label: component.label,
                   tag: component.defaults?.tag || 'div',
@@ -117,18 +106,16 @@ export default function EditorCanvas() {
                 Drag components from the left panel to start building your page
               </p>
             )}
+
             {elements.map((el, idx) => (
               <CanvasItem
                 key={idx}
                 component={el}
                 index={idx}
-                selected={selectedIndex}
+                selectedBlock={selectedBlock}
                 onSelect={handleSelect}
                 onDelete={handleDelete}
-                onUpdate={({ key, value }) =>
-                  handleUpdate({ key, value, index: idx })
-                }
-                devicePreview={devicePreview}
+                onUpdate={(updatedBlock) => handleUpdateBlock(idx, updatedBlock)}
               />
             ))}
           </div>
@@ -139,10 +126,19 @@ export default function EditorCanvas() {
           <Inspector
             devicePreview={devicePreview}
             setDevicePreview={setDevicePreview}
-            component={selectedIndex != null ? elements[selectedIndex] : null}
+            component={selectedBlock?.parentIndex != null ? elements[selectedBlock.parentIndex] : null}
+            selectedSubBlock={selectedBlock?.block || null}
+            updateSubBlock={(updatedBlock) => {
+              if (selectedBlock?.parentIndex != null) {
+                handleUpdateBlock(selectedBlock.parentIndex, updatedBlock);
+              }
+            }}
             onUpdate={(key, value) => {
-              if (selectedIndex == null) return;
-              handleUpdate({ key, value, index: selectedIndex });
+              if (selectedBlock?.parentIndex == null) return;
+              handleUpdateBlock(selectedBlock.parentIndex, {
+                ...selectedBlock.block,
+                [key]: value,
+              });
             }}
             bodyStyles={bodyStyles}
             onUpdateBodyStyles={handleUpdateBodyStyle}
