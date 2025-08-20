@@ -1,11 +1,7 @@
-import mongoose from 'mongoose';
-import dotenv from 'dotenv';
 import ComponentLibrary from '../src/models/ComponentLibrary.js';
+import { v4 as uuidv4 } from 'uuid';
 
-dotenv.config();
-const MONGO_URI = process.env.MONGO_URI;
-
-const baseButtonStyles = {
+const baseStyles = {
   paddingTop: '12px',
   paddingRight: '24px',
   paddingBottom: '12px',
@@ -22,7 +18,9 @@ const baseButtonStyles = {
   marginLeft: 'auto',
   fontFamily: 'Arial, sans-serif',
   border: 'none',
-  color: '#fff',
+  color: '#333',
+  boxShadow: '0px 2px 8px 0px #0000000d',
+  display: 'inline-block',
 };
 
 const buttons = [
@@ -33,7 +31,7 @@ const buttons = [
     defaults: {
       tag: 'button',
       styles: {
-        ...baseButtonStyles,
+        ...baseStyles,
         backgroundColor: '#007bff',
         boxShadowOffsetX: '0px',
         boxShadowOffsetY: '4px',
@@ -41,7 +39,9 @@ const buttons = [
         boxShadowSpread: '0px',
         boxShadowColor: '#0056b3',
       },
-      content: 'Primary',
+      contentBlocks: [
+        { id: uuidv4(), type: 'text', tag: 'span', innerHtml: 'Primary', styles: {} },
+      ],
     },
   },
   {
@@ -51,15 +51,13 @@ const buttons = [
     defaults: {
       tag: 'button',
       styles: {
-        ...baseButtonStyles,
+        ...baseStyles,
         backgroundColor: '#6c757d',
-        boxShadowOffsetX: '0px',
-        boxShadowOffsetY: '4px',
-        boxShadowBlur: '6px',
-        boxShadowSpread: '0px',
         boxShadowColor: '#545b62',
       },
-      content: 'Secondary',
+      contentBlocks: [
+        { id: uuidv4(), type: 'text', tag: 'span', innerHtml: 'Secondary', styles: {} },
+      ],
     },
   },
   {
@@ -69,15 +67,13 @@ const buttons = [
     defaults: {
       tag: 'button',
       styles: {
-        ...baseButtonStyles,
+        ...baseStyles,
         backgroundColor: '#28a745',
-        boxShadowOffsetX: '0px',
-        boxShadowOffsetY: '4px',
-        boxShadowBlur: '6px',
-        boxShadowSpread: '0px',
         boxShadowColor: '#1e7e34',
       },
-      content: 'Success',
+      contentBlocks: [
+        { id: uuidv4(), type: 'text', tag: 'span', innerHtml: 'Success', styles: {} },
+      ],
     },
   },
   {
@@ -87,15 +83,13 @@ const buttons = [
     defaults: {
       tag: 'button',
       styles: {
-        ...baseButtonStyles,
+        ...baseStyles,
         backgroundColor: '#dc3545',
-        boxShadowOffsetX: '0px',
-        boxShadowOffsetY: '4px',
-        boxShadowBlur: '6px',
-        boxShadowSpread: '0px',
         boxShadowColor: '#bd2130',
       },
-      content: 'Danger',
+      contentBlocks: [
+        { id: uuidv4(), type: 'text', tag: 'span', innerHtml: 'Danger', styles: {} },
+      ],
     },
   },
   {
@@ -105,16 +99,14 @@ const buttons = [
     defaults: {
       tag: 'button',
       styles: {
-        ...baseButtonStyles,
+        ...baseStyles,
         backgroundColor: '#ffc107',
         color: '#212529',
-        boxShadowOffsetX: '0px',
-        boxShadowOffsetY: '4px',
-        boxShadowBlur: '6px',
-        boxShadowSpread: '0px',
         boxShadowColor: '#d39e00',
       },
-      content: 'Warning',
+      contentBlocks: [
+        { id: uuidv4(), type: 'text', tag: 'span', innerHtml: 'Warning', styles: {} },
+      ],
     },
   },
   {
@@ -124,17 +116,15 @@ const buttons = [
     defaults: {
       tag: 'button',
       styles: {
-        ...baseButtonStyles,
+        ...baseStyles,
         backgroundColor: 'transparent',
         color: '#007bff',
         border: '2px solid #007bff',
-        boxShadowOffsetX: '0px',
-        boxShadowOffsetY: '0px',
-        boxShadowBlur: '0px',
-        boxShadowSpread: '0px',
         boxShadowColor: 'transparent',
       },
-      content: 'Outline Primary',
+      contentBlocks: [
+        { id: uuidv4(), type: 'text', tag: 'span', innerHtml: 'Outline Primary', styles: {} },
+      ],
     },
   },
   {
@@ -144,38 +134,25 @@ const buttons = [
     defaults: {
       tag: 'button',
       styles: {
-        ...baseButtonStyles,
+        ...baseStyles,
         backgroundColor: 'transparent',
         color: '#007bff',
         border: 'none',
-        boxShadowOffsetX: '0px',
-        boxShadowOffsetY: '0px',
-        boxShadowBlur: '0px',
-        boxShadowSpread: '0px',
-        boxShadowColor: 'transparent',
         textDecoration: 'underline',
         paddingTop: '0px',
         paddingBottom: '0px',
+        boxShadowColor: 'transparent',
       },
-      content: 'Link',
+      contentBlocks: [
+        { id: uuidv4(), type: 'text', tag: 'span', innerHtml: 'Link', styles: {} },
+      ],
     },
   },
 ];
 
-const seedButtons = async () => {
-  try {
-    await mongoose.connect(MONGO_URI);
-    console.log('Connected to MongoDB');
 
-    await ComponentLibrary.deleteMany({ type: { $in: buttons.map((b) => b.type) } });
-    await ComponentLibrary.insertMany(buttons);
-
-    console.log('✅ Buttons seeded successfully');
-    process.exit(0);
-  } catch (error) {
-    console.error('❌ Failed to seed buttons:', error);
-    process.exit(1);
-  }
+export const seedButtons = async () => {
+  await ComponentLibrary.deleteMany({ type: { $in: buttons.map((b) => b.type) } });
+  await ComponentLibrary.insertMany(buttons);
+  console.log('✅ Buttons seeded successfully');
 };
-
-seedButtons();
