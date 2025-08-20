@@ -60,16 +60,19 @@ export default function Inspector ({ component, selectedElement, onUpdate, selec
       if (selectedSubBlock) {
         const foundBlock = flat.find(b => b.id === selectedSubBlock.id);
         setCurrentBlock(foundBlock || null);
-        setOpenSection(foundBlock?.type === "text" || foundBlock?.type === "heading" ? "text" : null);
+       // Only auto-open text section if nothing is open yet
+     if (!openSection) {
+       setOpenSection(
+         foundBlock?.type === "text" || foundBlock?.type === "heading" ? "text" : null
+       );
+     }
       } else {
         // Parent component is selected: do not auto-select a child
         setCurrentBlock(null);
-        setOpenSection(null);
       }
     } else {
       setFlattenedBlocks([]);
       setCurrentBlock(null);
-      setOpenSection(null);
     }
   }, [component, selectedSubBlock]);
 
