@@ -57,9 +57,9 @@ const BlockRenderer = ({ block, parentStyles = {}, selectedBlock, onSelect, onUp
   };
 
   const outlineStyle = isSelected
-    ? '2px dashed lightblue'
+    ? '2px solid lightblue'
     : hovered
-    ? '1px dashed rgba(0,0,0,0.3)'
+    ? '1px solid rgba(0,0,0,0.3)'
     : 'none';
 
   const selectedBackground = isSelected ? 'rgba(173,216,230,0.2)' : 'transparent';
@@ -244,14 +244,18 @@ const CanvasItem = ({ component, index, onSelect, selectedBlock, onDelete, onUpd
           Delete
         </button>
       )}
-
-      <div
-        className="canvas-item"
-        style={{
-          ...component.defaults.styles,
-          outline: isParentSelected ? '2px dotted lightblue' : 'none',
-        }}
-      >
+        <div
+          className="canvas-item"
+          style={{
+            ...component.defaults.styles,
+            boxShadow: [
+              component.defaults.styles?.boxShadow || 'none',
+              isParentSelected ? 'inset 0 0 0 2px lightblue' : ''
+            ]
+              .filter(Boolean)
+              .join(', '),
+          }}
+        >
         {component.defaults.contentBlocks?.map((block) => {
           const childParentStyles = {};
           inheritableProps.forEach((key) => {
@@ -280,7 +284,7 @@ const CanvasItem = ({ component, index, onSelect, selectedBlock, onDelete, onUpd
             left: 0,
             right: 0,
             bottom: 0,
-            border: '1px dashed rgba(0,0,0,0.3)',
+            border: '1px solid rgba(0,0,0,0.3)',
             pointerEvents: 'none',
           }}
         />
