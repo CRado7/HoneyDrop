@@ -26,7 +26,7 @@ const inheritableProps = [
 ];
 
 const voidTags = [
-  'area','base','br','col','embed','hr','input','link','meta','source','track','wbr'
+  'area','base','br','col','embed','hr','link','meta','source','track','wbr'
 ];
 
 const computeBlockStyles = (block, parentStyles = {}) => {
@@ -49,7 +49,6 @@ const BlockRenderer = ({ block, parentStyles = {}, selectedBlock, onSelect, onUp
   const hasChildren = Array.isArray(block.contentBlocks) && block.contentBlocks.length > 0;
   const isHtmlContainer = Tag === 'div' || Tag === 'span';
 
-  // ✅ Only mark a block selected if selectedBlock.id exists
   const isSelected = selectedBlock?.id ? selectedBlock.id === block.id : false;
 
   const handleClick = (e) => {
@@ -80,6 +79,7 @@ const BlockRenderer = ({ block, parentStyles = {}, selectedBlock, onSelect, onUp
     );
   }
 
+  // --- void elements (e.g. <br>, <hr>) ---
   if (voidTags.includes(Tag)) {
     return (
       <Tag
@@ -92,6 +92,62 @@ const BlockRenderer = ({ block, parentStyles = {}, selectedBlock, onSelect, onUp
     );
   }
 
+  // --- textarea handling ---
+  if (Tag === 'textarea') {
+    return (
+      <textarea
+        style={{ ...styles, outline: outlineStyle, background: selectedBackground, cursor: 'pointer' }}
+        value={block.content || ''}
+        onClick={handleClick}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        onChange={(e) => onUpdate({ ...block, content: e.currentTarget.value })}
+        {...(block.attrs || {})}
+        disabled
+      />
+    );
+  }
+
+  // --- input handling ---
+  if (Tag === 'input') {
+    return (
+      <input
+        style={{ ...styles, outline: outlineStyle, background: selectedBackground, cursor: 'pointer' }}
+        value={block.content || ''}
+        onClick={handleClick}
+        onMouseEnter={() => setHovered(false)}
+        onMouseLeave={() => setHovered(false)}
+        onChange={(e) => onUpdate({ ...block, content: e.currentTarget.value })}
+        {...(block.attrs || {})}
+        disabled
+      />
+    );
+  }
+
+  // --- span handling ---
+  if (Tag === 'span') {
+    return (
+      <span
+        style={{ ...styles, outline: outlineStyle, background: selectedBackground, cursor: 'pointer' }}
+        onClick={handleClick}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        contentEditable={isSelected && block.type === 'text'}
+        suppressContentEditableWarning
+        onInput={(e) =>
+          onUpdate({ ...block, content: e.currentTarget.textContent, innerHtml: e.currentTarget.textContent })
+        }
+        onBlur={(e) => {
+          if (Tag !== 'img') onUpdate({ ...block, innerHtml: e.currentTarget.innerHTML });
+        }}
+        {...(block.attrs || {})}
+      >
+        {block.content || block.text || block.innerHtml || ''}
+      </span>
+    );
+  }
+
+  // --- default rendering ---
   const childNodes = hasChildren
     ? block.contentBlocks.map((child) => {
         const childParentStyles = {};
@@ -116,23 +172,28 @@ const BlockRenderer = ({ block, parentStyles = {}, selectedBlock, onSelect, onUp
 
   return (
     <Tag
-      style={{ ...styles, outline: outlineStyle, background: selectedBackground, position: 'relative', cursor: 'pointer' }}
+      style={{
+        ...styles,
+        outline: outlineStyle,
+        background: selectedBackground,
+        position: 'relative',
+        cursor: 'pointer',
+      }}
       onClick={handleClick}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      contentEditable={isSelected && block.type === 'text' && Tag !== 'textarea' && Tag !== 'input'}
+      contentEditable={isSelected && block.type === 'text'}
       suppressContentEditableWarning
       onInput={(e) =>
         onUpdate({ ...block, content: e.currentTarget.textContent, innerHtml: e.currentTarget.textContent })
       }
       onBlur={(e) => {
-        if (Tag === 'input' || Tag === 'textarea') onUpdate({ ...block, content: e.currentTarget.value });
-        else if (Tag !== 'img') onUpdate({ ...block, innerHtml: e.currentTarget.innerHTML });
+        if (Tag !== 'img') onUpdate({ ...block, innerHtml: e.currentTarget.innerHTML });
       }}
       {...(block.attrs || {})}
       dangerouslySetInnerHTML={isHtmlContainer && !hasChildren ? { __html: rawContent } : undefined}
     >
-      {!isHtmlContainer || hasChildren ? rawContent : null}
+      {(!isHtmlContainer || hasChildren) ? rawContent : null}
       {childNodes}
     </Tag>
   );
