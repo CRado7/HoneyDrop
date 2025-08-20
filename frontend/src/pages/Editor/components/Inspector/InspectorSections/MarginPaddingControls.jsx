@@ -1,16 +1,23 @@
-// src/components/InspectorSections/MarginPaddingControl.js
 import React from 'react';
 import { Form, Row, Col } from 'react-bootstrap';
 
 export default function MarginPaddingControl({ type, mergedStyles, updateStyle }) {
   const sides = ['Top', 'Right', 'Bottom', 'Left'];
   const isMargin = type.toLowerCase() === 'margin';
-  const margin = mergedStyles[`${type}`] || '';
-  const marginLeft = mergedStyles[`${type}Left`] || '';
-  const marginRight = mergedStyles[`${type}Right`] || '';
+
+  // Ensure all side-specific styles exist
+  const stylesWithDefaults = {
+    [`${type}Top`]: '0px',
+    [`${type}Right`]: '0px',
+    [`${type}Bottom`]: '0px',
+    [`${type}Left`]: '0px',
+    ...mergedStyles
+  };
+
   const marginAuto =
     isMargin &&
-    (margin === '0 auto' || (marginLeft === 'auto' && marginRight === 'auto'));
+    (stylesWithDefaults[`${type}Left`] === 'auto' &&
+      stylesWithDefaults[`${type}Right`] === 'auto');
 
   const parseValueUnit = (raw) => {
     const match = /^(-?\d+(\.\d+)?)([a-z%]*)$/.exec(raw);
@@ -21,32 +28,28 @@ export default function MarginPaddingControl({ type, mergedStyles, updateStyle }
   const toggleMarginAuto = (checked) => {
     if (!isMargin) return;
 
-    let newStyles = { ...mergedStyles };
+    const newStyles = { ...stylesWithDefaults };
 
     if (checked) {
-      newStyles[`${type}`] = '';
       newStyles[`${type}Left`] = 'auto';
       newStyles[`${type}Right`] = 'auto';
-      newStyles[`${type}Top`] = newStyles[`${type}Top`] || '0px';
-      newStyles[`${type}Bottom`] = newStyles[`${type}Bottom`] || '0px';
     } else {
-      newStyles[`${type}`] = '';
       newStyles[`${type}Left`] = '0px';
       newStyles[`${type}Right`] = '0px';
-      newStyles[`${type}Top`] = newStyles[`${type}Top`] || '0px';
-      newStyles[`${type}Bottom`] = newStyles[`${type}Bottom`] || '0px';
     }
 
-    updateStyle(null, newStyles);
+    // Keep top/bottom as-is
+    updateStyle(newStyles);
   };
 
   const onSliderChange = (side, valueNum, unit) => {
-    let newStyles = { ...mergedStyles };
-    if (isMargin && marginAuto && (side === 'Left' || side === 'Right')) {
-      return;
+    const newStyles = { ...stylesWithDefaults };
+
+    // Only disable left/right sliders if marginAuto is true
+    if (!(isMargin && marginAuto && (side === 'Left' || side === 'Right'))) {
+      newStyles[`${type}${side}`] = `${valueNum}${unit}`;
+      updateStyle(newStyles);
     }
-    newStyles[`${type}${side}`] = `${valueNum}${unit}`;
-    updateStyle(null, newStyles);
   };
 
   return (
@@ -65,7 +68,7 @@ export default function MarginPaddingControl({ type, mergedStyles, updateStyle }
       )}
 
       {sides.map((side) => {
-        const rawValue = mergedStyles[`${type}${side}`] || '0px';
+        const rawValue = stylesWithDefaults[`${type}${side}`];
         const [valueNum, currentUnit] = parseValueUnit(rawValue);
 
         const disabled = isMargin && marginAuto && (side === 'Left' || side === 'Right');
@@ -73,8 +76,8 @@ export default function MarginPaddingControl({ type, mergedStyles, updateStyle }
         return (
           <Form.Group key={`${type}${side}-slider`} className="mb-2">
             <Form.Label>
-              {type.charAt(0).toUpperCase() + type.slice(1)} {side}: {disabled ? 'auto' : valueNum}
-              {disabled ? '' : currentUnit}
+              {type.charAt(0).toUpperCase() + type.slice(1)} {side}:{' '}
+              {disabled ? 'auto' : valueNum + currentUnit}
             </Form.Label>
             <Row>
               <Col xs={3}>

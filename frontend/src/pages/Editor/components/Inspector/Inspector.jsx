@@ -51,6 +51,17 @@ export default function Inspector ({ component, selectedElement, onUpdate, selec
     setCurrentBlock(updatedBlock);
   };
 
+  const updateBlockStyles = (newStyles) => {
+    if (!currentBlock) return; // do nothing if no block selected
+  
+    const updatedBlock = {
+      ...currentBlock,
+      styles: { ...currentBlock.styles, ...newStyles }
+    };
+  
+    handleUpdateSubBlock(updatedBlock);
+  };
+
   useEffect(() => {
     if (component?.defaults?.contentBlocks?.length) {
       const flat = flattenBlocks(component.defaults.contentBlocks);
@@ -83,18 +94,26 @@ export default function Inspector ({ component, selectedElement, onUpdate, selec
     ? { ...GLOBAL_DEFAULT_STYLES, ...currentBlock.styles }
     : { ...GLOBAL_DEFAULT_STYLES, ...component.defaults.styles };
 
-  const updateStyle = (key, value) => {
-    if (currentBlock) {
-      const updatedBlock = { ...currentBlock, styles: { ...mergedStyles, [key]: value } };
-      handleUpdateSubBlock(updatedBlock);
-    } else {
-      const updatedDefaults = {
-        ...component.defaults,
-        styles: { ...mergedStyles, [key]: value }
-      };
-      onUpdate('defaults', updatedDefaults);
-    }
-  };
+    const updateStyle = (newStylesOrKey, maybeValue) => {
+      if (typeof newStylesOrKey === 'object') {
+        // full object passed
+        if (currentBlock) {
+          handleUpdateSubBlock({ ...currentBlock, styles: newStylesOrKey });
+        } else {
+          onUpdate('defaults', { ...component.defaults, styles: newStylesOrKey });
+        }
+      } else {
+        // single key/value passed
+        const key = newStylesOrKey;
+        const value = maybeValue;
+        const merged = { ...mergedStyles, [key]: value };
+        if (currentBlock) {
+          handleUpdateSubBlock({ ...currentBlock, styles: merged });
+        } else {
+          onUpdate('defaults', { ...component.defaults, styles: merged });
+        }
+      }
+    };    
 
   const updateContent = (newContent) => {
     if (currentBlock) {
@@ -175,8 +194,8 @@ export default function Inspector ({ component, selectedElement, onUpdate, selec
               <Accordion.Item eventKey="marginpadding">
                 <Accordion.Header>Margin & Padding</Accordion.Header>
                 <Accordion.Body>
-                  <MarginPaddingControls type="margin" mergedStyles={mergedStyles} updateStyle={updateStyle} />
-                  <MarginPaddingControls type="padding" mergedStyles={mergedStyles} updateStyle={updateStyle} />
+                  <MarginPaddingControls type="margin" mergedStyles={mergedStyles} updateStyle={updateBlockStyles} />
+                  <MarginPaddingControls type="padding" mergedStyles={mergedStyles} updateStyle={updateBlockStyles} />
                 </Accordion.Body>
               </Accordion.Item>
 
@@ -190,7 +209,7 @@ export default function Inspector ({ component, selectedElement, onUpdate, selec
               <Accordion.Item eventKey="shadow">
                 <Accordion.Header>Shadow Effects</Accordion.Header>
                 <Accordion.Body>
-                  <ShadowEffects mergedStyles={mergedStyles} updateStyle={updateStyle} parseValueUnit={parseValueUnit} />
+                  <ShadowEffects mergedStyles={mergedStyles} updateStyle={updateBlockStyles} parseValueUnit={parseValueUnit} />
                 </Accordion.Body>
               </Accordion.Item>
 
