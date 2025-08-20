@@ -1,7 +1,6 @@
 // src/components/CanvasItem.jsx
 import React, { useState } from 'react';
 import { useDrag, useDrop } from 'react-dnd';
-import { v4 as uuidv4 } from 'uuid';
 
 // ----------------- Helpers -----------------
 const buildBoxShadow = (styles) => {
@@ -50,8 +49,8 @@ const BlockRenderer = ({ block, parentStyles = {}, selectedBlock, onSelect, onUp
   const hasChildren = Array.isArray(block.contentBlocks) && block.contentBlocks.length > 0;
   const isHtmlContainer = Tag === 'div' || Tag === 'span';
 
-  const isSelected = (selectedBlock?.id && selectedBlock.id === block.id) ||
-                     (!selectedBlock?.id && selectedBlock?.parentIndex === parentIndex && block.isTopLevel);
+  // ✅ Only mark a block selected if selectedBlock.id exists
+  const isSelected = selectedBlock?.id ? selectedBlock.id === block.id : false;
 
   const handleClick = (e) => {
     e.stopPropagation();
@@ -66,7 +65,7 @@ const BlockRenderer = ({ block, parentStyles = {}, selectedBlock, onSelect, onUp
 
   const selectedBackground = isSelected ? 'rgba(173,216,230,0.2)' : 'transparent';
 
-  // --- Corrected img handling ---
+  // --- img handling ---
   if (Tag === 'img') {
     return (
       <img
@@ -157,7 +156,7 @@ const CanvasItem = ({ component, index, onSelect, selectedBlock, onDelete, onUpd
 
   const handleComponentClick = (e) => {
     e.stopPropagation();
-    onSelect({ parentIndex: index, id: null });
+    onSelect({ parentIndex: index, id: null }); // select parent only
   };
 
   const isParentSelected = selectedBlock?.parentIndex === index && !selectedBlock?.id;
@@ -198,12 +197,10 @@ const CanvasItem = ({ component, index, onSelect, selectedBlock, onDelete, onUpd
             if (component.defaults.styles?.[key] !== undefined) childParentStyles[key] = component.defaults.styles[key];
           });
 
-          const topLevelBlock = { ...block, isTopLevel: true };
-
           return (
             <BlockRenderer
               key={block.id}
-              block={topLevelBlock}
+              block={block}
               parentStyles={childParentStyles}
               selectedBlock={selectedBlock}
               onSelect={(b) => onSelect({ parentIndex: index, ...b })}

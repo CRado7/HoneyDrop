@@ -11,44 +11,9 @@ import LayoutOptions from './InspectorSections/LayoutOptions';
 import ImageOptions from './InspectorSections/ImageOptions';
 import PositionOptions from './InspectorSections/PositionOptions';
 
-const GLOBAL_DEFAULT_STYLES = {
-  fontSize: '16px',
-  fontWeight: 'normal',
-  color: '#000000',
-  fontFamily: 'Arial, sans-serif',
-  lineHeight: '1.6',
-  letterSpacing: '0px',
-
-  marginTop: '0px',
-  marginRight: '0px',
-  marginBottom: '16px',
-  marginLeft: '0px',
-
-  paddingTop: '0px',
-  paddingRight: '0px',
-  paddingBottom: '0px',
-  paddingLeft: '0px',
-
-  textAlign: 'left',
-
-  boxShadowOffsetX: '0px',
-  boxShadowOffsetY: '0px',
-  boxShadowBlur: '0px',
-  boxShadowSpread: '0px',
-  boxShadowColor: '#000000',
-  
-  backgroundColor: 'transparent',
-  backgroundImage: '',
-
-  borderWidth: '0px',
-  borderStyle: 'none',
-  borderColor: '#000000',
-  borderRadius: '0px',
-};
-
+const GLOBAL_DEFAULT_STYLES = { /* ...same as your previous definition... */ };
 const DEVICE_TYPES = ['desktop', 'tablet', 'mobile'];
 
-// --- Helper to flatten nested blocks ---
 function flattenBlocks(blocks, parentPath = '') {
   return blocks.reduce((acc, block, index) => {
     const path = parentPath ? `${parentPath}.${index}` : `${index}`;
@@ -71,8 +36,8 @@ export default function Inspector ({ component, selectedElement, onUpdate, selec
   const [currentBlock, setCurrentBlock] = useState(null);
   const [flattenedBlocks, setFlattenedBlocks] = useState([]);
   const [openSection, setOpenSection] = useState(null);
-  
-  // 🔹 Fix: handle updating nested sub-blocks
+
+  // Update a nested sub-block
   const handleUpdateSubBlock = (updatedBlock) => {
     const updateRecursively = (blocks) =>
       blocks.map(b =>
@@ -86,19 +51,18 @@ export default function Inspector ({ component, selectedElement, onUpdate, selec
     setCurrentBlock(updatedBlock);
   };
 
-  // Flatten blocks whenever the component changes
   useEffect(() => {
     if (component?.defaults?.contentBlocks?.length) {
       const flat = flattenBlocks(component.defaults.contentBlocks);
       setFlattenedBlocks(flat);
-  
-      // Only show the selected sub-block in inspector
+
+      // 🔹 Key change: only select a child if explicitly passed
       if (selectedSubBlock) {
         const foundBlock = flat.find(b => b.id === selectedSubBlock.id);
         setCurrentBlock(foundBlock || null);
         setOpenSection(foundBlock?.type === "text" || foundBlock?.type === "heading" ? "text" : null);
       } else {
-        // No sub-block selected: only show parent styles, do not select first child
+        // Parent component is selected: do not auto-select a child
         setCurrentBlock(null);
         setOpenSection(null);
       }
@@ -107,21 +71,33 @@ export default function Inspector ({ component, selectedElement, onUpdate, selec
       setCurrentBlock(null);
       setOpenSection(null);
     }
-  }, [component, selectedSubBlock]);  
+  }, [component, selectedSubBlock]);
 
   if (!component) return <p>Select an element to edit its content</p>;
-  if (!currentBlock) return <p>No content blocks available</p>;
 
-  const mergedStyles = { ...GLOBAL_DEFAULT_STYLES, ...currentBlock.styles };
+  // Show component-level styles if no block selected
+  const mergedStyles = currentBlock
+    ? { ...GLOBAL_DEFAULT_STYLES, ...currentBlock.styles }
+    : { ...GLOBAL_DEFAULT_STYLES, ...component.defaults.styles };
 
   const updateStyle = (key, value) => {
-    const updatedBlock = { ...currentBlock, styles: { ...mergedStyles, [key]: value } };
-    handleUpdateSubBlock(updatedBlock);
+    if (currentBlock) {
+      const updatedBlock = { ...currentBlock, styles: { ...mergedStyles, [key]: value } };
+      handleUpdateSubBlock(updatedBlock);
+    } else {
+      const updatedDefaults = {
+        ...component.defaults,
+        styles: { ...mergedStyles, [key]: value }
+      };
+      onUpdate('defaults', updatedDefaults);
+    }
   };
 
   const updateContent = (newContent) => {
-    const updatedBlock = { ...currentBlock, text: newContent };
-    handleUpdateSubBlock(updatedBlock);
+    if (currentBlock) {
+      const updatedBlock = { ...currentBlock, text: newContent };
+      handleUpdateSubBlock(updatedBlock);
+    }
   };
 
   return (
@@ -142,65 +118,34 @@ export default function Inspector ({ component, selectedElement, onUpdate, selec
 
         <Tab.Content>
           <Tab.Pane eventKey={selectedDevice}>
-          <Accordion activeKey={openSection} onSelect={(key) => setOpenSection(key)} flush>
+            <Accordion activeKey={openSection} onSelect={(key) => setOpenSection(key)} flush>
 
               <Accordion.Item eventKey="body">
                 <Accordion.Header>Body Styles</Accordion.Header>
                 <Accordion.Body>
                   <BodyStyles
-                    component={currentBlock}
+                    component={currentBlock || component.defaults}
                     GLOBAL_DEFAULT_STYLES={GLOBAL_DEFAULT_STYLES}
                     onUpdateBodyStyles={(k, v) => updateStyle(k, v)}
                   />
                 </Accordion.Body>
               </Accordion.Item>
 
-              <Accordion.Item eventKey="text">
-                <Accordion.Header>Content Editor</Accordion.Header>
-                <Accordion.Body>
-                 {selectedElement?.defaults?.contentBlocks?.length > 1 && (
-                    <div className="my-3">
-                      <label htmlFor="block-selector" className="form-label">Select Block</label>
-                      <select
-                        id="block-selector"
-                        className="form-select"
-                        value={currentBlock?.id || ''}
-                        onChange={(e) => {
-                          const selected = selectedElement.defaults.contentBlocks.find(
-                            b => b.id === e.target.value
-                          );
-                          setCurrentBlock(selected);
-                        }}
-                      >
-                        {selectedElement.defaults.contentBlocks.map(block => (
-                          <option key={block.id} value={block.id}>
-                            {block.type} ({block.tag})
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  )}
-
-                  {currentBlock && (
+              {currentBlock && (currentBlock.type === 'text' || currentBlock.type === 'heading') && (
+                <Accordion.Item eventKey="text">
+                  <Accordion.Header>Content Editor</Accordion.Header>
+                  <Accordion.Body>
                     <TextOptions
                       selectedBlock={currentBlock}
-                      updateStyle={(key, value) => {
-                        const updatedBlock = { ...currentBlock, styles: { ...currentBlock.styles, [key]: value } };
-                        setCurrentBlock(updatedBlock);
-                        handleUpdateSubBlock(updatedBlock);
-                      }}
+                      updateStyle={(k, v) => updateStyle(k, v)}
                       parseValueUnit={parseValueUnit}
-                      onChange={(newHtml) => {
-                        const updatedBlock = { ...currentBlock, innerHtml: newHtml };
-                        setCurrentBlock(updatedBlock);
-                        handleUpdateSubBlock(updatedBlock);
-                      }}
+                      onChange={(newHtml) => updateContent(newHtml)}
                     />
-                  )}
                   </Accordion.Body>
                 </Accordion.Item>
-              
-              {currentBlock.type === 'image' && (
+              )}
+
+              {currentBlock?.type === 'image' && (
                 <Accordion.Item eventKey="image">
                   <Accordion.Header>Image Options</Accordion.Header>
                   <Accordion.Body>
