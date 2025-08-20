@@ -11,7 +11,18 @@ import LayoutOptions from './InspectorSections/LayoutOptions';
 import ImageOptions from './InspectorSections/ImageOptions';
 import PositionOptions from './InspectorSections/PositionOptions';
 
-const GLOBAL_DEFAULT_STYLES = { /* ...same as your previous definition... */ };
+const GLOBAL_DEFAULT_STYLES = {
+  display: 'block',
+  marginTop: '0px',
+  marginRight: '0px',
+  marginBottom: '0px',
+  marginLeft: '0px',
+  paddingTop: '0px',
+  paddingRight: '0px',
+  paddingBottom: '0px',
+  paddingLeft: '0px',
+  boxSizing: 'border-box',
+};
 const DEVICE_TYPES = ['desktop', 'tablet', 'mobile'];
 
 function flattenBlocks(blocks, parentPath = '') {
@@ -194,8 +205,8 @@ export default function Inspector ({ component, selectedElement, onUpdate, selec
               <Accordion.Item eventKey="marginpadding">
                 <Accordion.Header>Margin & Padding</Accordion.Header>
                 <Accordion.Body>
-                  <MarginPaddingControls type="margin" mergedStyles={mergedStyles} updateStyle={updateBlockStyles} />
-                  <MarginPaddingControls type="padding" mergedStyles={mergedStyles} updateStyle={updateBlockStyles} />
+                  <MarginPaddingControls type="margin" mergedStyles={mergedStyles} updateStyle={updateStyle} />
+                  <MarginPaddingControls type="padding" mergedStyles={mergedStyles} updateStyle={updateStyle} />
                 </Accordion.Body>
               </Accordion.Item>
 

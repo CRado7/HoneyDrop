@@ -110,6 +110,7 @@ export default function EditorCanvas() {
               backgroundColor: 'white',
               boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
               borderRadius: '0px',
+              paddingTop: '1px',
             }}
           >
             {elements.length === 0 && (
