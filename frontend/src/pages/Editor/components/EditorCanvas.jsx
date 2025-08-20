@@ -58,6 +58,17 @@ export default function EditorCanvas() {
     }
   };
 
+  const handleUpdateDefaults = (parentIndex, updatedDefaults) => {
+    setElements(prev => {
+      const updated = [...prev];
+      updated[parentIndex] = {
+        ...updated[parentIndex],
+        defaults: updatedDefaults
+      };
+      return updated;
+    });
+  };  
+
   // --- Delete element ---
   const handleDelete = (index) => {
     setElements(prev => prev.filter((_, i) => i !== index));
@@ -133,13 +144,25 @@ export default function EditorCanvas() {
                 handleUpdateBlock(selectedBlock.parentIndex, updatedBlock);
               }
             }}
-            onUpdate={(key, value) => {
-              if (selectedBlock?.parentIndex == null) return;
-              handleUpdateBlock(selectedBlock.parentIndex, {
-                ...selectedBlock.block,
-                [key]: value,
-              });
-            }}
+             onUpdate={(path, value) => {
+                 if (selectedBlock?.parentIndex == null) return;
+              
+                 if (path === "defaults") {
+                   handleUpdateDefaults(selectedBlock.parentIndex, value);   // 🔑 parent styles
+                 } else if (path === "defaults.contentBlocks") {
+                   // full contentBlocks replacement
+                   handleUpdateDefaults(selectedBlock.parentIndex, {
+                     ...elements[selectedBlock.parentIndex].defaults,
+                     contentBlocks: value
+                   });
+                 } else {
+                   // fallback: updating a block field
+                   handleUpdateBlock(selectedBlock.parentIndex, {
+                     ...selectedBlock.block,
+                     [path]: value,
+                   });
+                 }
+               }}
             bodyStyles={bodyStyles}
             onUpdateBodyStyles={handleUpdateBodyStyle}
           />
