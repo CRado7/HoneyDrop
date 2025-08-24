@@ -57,9 +57,15 @@ const BlockRenderer = ({ block, parentStyles = {}, selectedBlock, onSelect, onUp
   };
 
   const outlineStyle = isSelected
-    ? '2px solid lightblue'
+    ? 'inset 0 0 0 2px lightblue'
     : hovered
-    ? '1px solid rgba(0,0,0,0.3)'
+    ? 'inset 0 0 0 2px lightblue'
+    : 'none';
+
+    const imageOutlineStyle = isSelected
+    ? '0 0 0 2px lightblue'
+    : hovered
+    ? '0 0 0 2px lightblue'
     : 'none';
 
   const selectedBackground = isSelected ? 'rgba(173,216,230,0.2)' : 'transparent';
@@ -68,7 +74,7 @@ const BlockRenderer = ({ block, parentStyles = {}, selectedBlock, onSelect, onUp
   if (Tag === 'img') {
     return (
       <img
-        style={{ ...styles, outline: outlineStyle, background: selectedBackground, cursor: 'pointer' }}
+        style={{ ...styles, boxShadow: imageOutlineStyle, background: selectedBackground, cursor: 'pointer' }}
         src={block.src || ''}
         alt={block.alt || ''}
         onClick={handleClick}
@@ -96,7 +102,7 @@ const BlockRenderer = ({ block, parentStyles = {}, selectedBlock, onSelect, onUp
   if (Tag === 'textarea') {
     return (
       <textarea
-        style={{ ...styles, outline: outlineStyle, background: selectedBackground, cursor: 'pointer' }}
+        style={{ ...styles, boxShadow: outlineStyle, background: selectedBackground, cursor: 'pointer' }}
         value={block.content || ''}
         onClick={handleClick}
         onMouseEnter={() => setHovered(true)}
@@ -112,7 +118,7 @@ const BlockRenderer = ({ block, parentStyles = {}, selectedBlock, onSelect, onUp
   if (Tag === 'input') {
     return (
       <input
-        style={{ ...styles, outline: outlineStyle, background: selectedBackground, cursor: 'pointer' }}
+        style={{ ...styles, boxShadow: outlineStyle, background: selectedBackground, cursor: 'pointer' }}
         value={block.content || ''}
         onClick={handleClick}
         onMouseEnter={() => setHovered(false)}
@@ -128,7 +134,7 @@ const BlockRenderer = ({ block, parentStyles = {}, selectedBlock, onSelect, onUp
   if (Tag === 'span') {
     return (
       <span
-        style={{ ...styles, outline: outlineStyle, background: selectedBackground, cursor: 'pointer' }}
+        style={{ ...styles, boxShadow: outlineStyle, background: selectedBackground, cursor: 'pointer' }}
         onClick={handleClick}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
@@ -174,7 +180,7 @@ const BlockRenderer = ({ block, parentStyles = {}, selectedBlock, onSelect, onUp
     <Tag
       style={{
         ...styles,
-        outline: outlineStyle,
+        boxShadow: outlineStyle,
         background: selectedBackground,
         position: 'relative',
         cursor: 'pointer',
@@ -224,72 +230,78 @@ const CanvasItem = ({ component, index, onSelect, selectedBlock, onDelete, onUpd
 
   return (
     <div
-      ref={ref}
-      className="canvas-item-outer"
-      style={{
-        width: '100%',
-        position: 'relative',
-        opacity: isDragging ? 0.5 : 1,
-        cursor: 'pointer',
-      }}
-      onClick={handleComponentClick}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-    >
-      {isParentSelected && (
-        <button
-          className="btn btn-sm position-absolute top-0 end-0 m-0 text-black"
-          onClick={(e) => { e.stopPropagation(); onDelete(index); }}
-        >
-          Delete
-        </button>
-      )}
+        ref={ref}
+        className="canvas-item-outer"
+        style={{
+          width: '100%',              // keep full-row wrapper
+          position: 'relative',
+          opacity: isDragging ? 0.5 : 1,
+          cursor: 'pointer',
+        }}
+        onClick={handleComponentClick}
+      >
+        {isParentSelected && (
+          <button
+            className="btn btn-sm position-absolute top-0 end-0 m-0 text-black"
+            onClick={(e) => { e.stopPropagation(); onDelete(index); }}
+          >
+            Delete
+          </button>
+        )}
+
         <div
           className="canvas-item"
+          onMouseEnter={() => setHovered(true)}      // <— move hover handlers here
+          onMouseLeave={() => setHovered(false)}
           style={{
-            ...component.defaults.styles,
-            boxShadow: [
-              component.defaults.styles?.boxShadow || 'none',
-              isParentSelected ? 'inset 0 0 0 2px lightblue' : ''
-            ]
-              .filter(Boolean)
-              .join(', '),
+            ...component.defaults.styles,            // component’s real box
+            position: 'relative',                    // <— must be in style, not as a prop
+            boxShadow: component.defaults.styles?.boxShadow || 'none',
           }}
         >
-        {component.defaults.contentBlocks?.map((block) => {
-          const childParentStyles = {};
-          inheritableProps.forEach((key) => {
-            if (component.defaults.styles?.[key] !== undefined) childParentStyles[key] = component.defaults.styles[key];
-          });
-
-          return (
+          {component.defaults.contentBlocks?.map((block) => (
             <BlockRenderer
               key={block.id}
               block={block}
-              parentStyles={childParentStyles}
+              parentStyles={(() => {
+                const s = {};
+                inheritableProps.forEach((k) => {
+                  if (component.defaults.styles?.[k] !== undefined) s[k] = component.defaults.styles[k];
+                });
+                return s;
+              })()}
               selectedBlock={selectedBlock}
               onSelect={(b) => onSelect({ parentIndex: index, ...b })}
               onUpdate={(updated) => onUpdate(updated)}
               parentIndex={index}
             />
-          );
-        })}
-      </div>
+          ))}
 
-      {hovered && !isParentSelected && (
-        <div
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            border: '1px solid rgba(0,0,0,0.3)',
-            pointerEvents: 'none',
-          }}
-        />
-      )}
-    </div>
+          {/* Hover ring only on the component box */}
+          {hovered && !isParentSelected && (
+            <div
+              style={{
+                position: 'absolute',
+                inset: 0,
+                boxShadow: 'inset 0 0 0 2px lightblue',
+                pointerEvents: 'none',
+              }}
+            />
+          )}
+
+          {/* Parent selection ring (also inside, so it doesn’t clobber default shadows) */}
+          {isParentSelected && (
+            <div
+              style={{
+                position: 'absolute',
+                inset: 0,
+                boxShadow: 'inset 0 0 0 2px lightblue',
+                pointerEvents: 'none',
+              }}
+            />
+          )}
+        </div>
+      </div>
   );
 };
 
